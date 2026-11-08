@@ -36,6 +36,7 @@ export function EditorCanvas() {
   const setDrag = (d: Drag | null) => { dragRef.current = d; _setDrag(d); };
   const [space, setSpace] = useState(false);
   const [cursorPt, setCursorPt] = useState<Pt | null>(null);
+  const lastClick = useRef<{ t: number; key: string; x: number; y: number } | null>(null);
   const [guides, setGuides] = useState<{ x: number[]; y: number[] }>({ x: [], y: [] });
   const S = useEditor.getState;
 
@@ -146,6 +147,8 @@ export function EditorCanvas() {
     if (tool === 'pen') {
       const pts = st.pen ?? [];
       if (pts.length > 2 && Math.hypot(pts[0].x - p.x, pts[0].y - p.y) * vp.zoom < 8) return finishPen(true);
+      const last = pts[pts.length - 1];
+      if (last && Math.hypot(last.x - p.x, last.y - p.y) * vp.zoom < 4) return finishPen(false); // double-click = finish open path
       st.set({ pen: [...pts, p] });
       return;
     }
@@ -167,6 +170,31 @@ export function EditorCanvas() {
     }
     if (tool !== 'select') { setDrag({ kind: 'create', tool, start: p, cur: p }); return; }
 
+    // manual double-click detection (pointer capture retargets native dblclick to the svg)
+    {
+      const segEl = t.closest('[data-seg]');
+      const sidEl = t.closest('[data-sid]');
+      const key = segEl ? 'seg:' + segEl.getAttribute('data-seg') : sidEl ? 'sid:' + sidEl.getAttribute('data-sid') : '';
+      const now = performance.now();
+      const lc = lastClick.current;
+      if (key && lc && lc.key === key && now - lc.t < 380 && Math.hypot(lc.x - ev.clientX, lc.y - ev.clientY) < 6) {
+        lastClick.current = null;
+        if (segEl && st.editPoints) {
+          const idx = +segEl.getAttribute('data-seg')!;
+          st.change((df) => {
+            const s = df.shapes.find((x) => x.id === st.editPoints);
+            if (s?.type !== 'polygon') return;
+            const pts = polyAbs(s as any); pts.splice(idx + 1, 0, { x: sn(w.x), y: sn(w.y) }); setPolyAbs(s as any, pts);
+          });
+          return;
+        }
+        if (sidEl) {
+          const s = st.def.shapes.find((x) => x.id === sidEl.getAttribute('data-sid'));
+          if (s?.type === 'polygon') { st.set({ editPoints: s.id, selection: [s.id] }); return; }
+        }
+      }
+      lastClick.current = key ? { t: now, key, x: ev.clientX, y: ev.clientY } : null;
+    }
     const vEl = t.closest('[data-vertex]');
     if (vEl) {
       const idx = +vEl.getAttribute('data-vertex')!;

@@ -64,6 +64,8 @@ export function Canvas() {
   const [editing, setEditing] = useState<Editing | null>(null);
   const [menu, setMenu] = useState<{ x: number; y: number; items: MenuItem[] } | null>(null);
   const [space, setSpace] = useState(false);
+  // pointer capture makes browser dblclick events target the <svg>, so detect double clicks ourselves
+  const lastClick = useRef<{ t: number; id: string | null; x: number; y: number } | null>(null);
 
   const store = useStore.getState;
 
@@ -183,10 +185,10 @@ export function Canvas() {
   const devicePortsVisible = useMemo(() => {
     const ids = new Set<string>();
     if (showAllPorts || tool === 'connect' || drag?.kind === 'link') {
-      Object.values(page.nodes).forEach((n) => n.kind === 'device' && !n.hidden && ids.add(n.id));
+      Object.values(page.nodes).forEach((n) => n.kind === 'device' && !n.hidden && !n.locked && ids.add(n.id));
     } else {
-      if (hover && page.nodes[hover]?.kind === 'device') ids.add(hover);
-      selection.forEach((id) => page.nodes[id]?.kind === 'device' && ids.add(id));
+      if (hover && page.nodes[hover]?.kind === 'device' && !page.nodes[hover].locked) ids.add(hover);
+      selection.forEach((id) => page.nodes[id]?.kind === 'device' && !page.nodes[id].locked && ids.add(id));
     }
     return ids;
   }, [showAllPorts, tool, drag?.kind, hover, selection, page]);
@@ -269,6 +271,20 @@ export function Canvas() {
     const linkEl = target.closest('[data-link-id]');
     const nodeEl = target.closest('[data-id]');
     const nodeId = nodeEl?.getAttribute('data-id') ?? null;
+
+    if (tool === 'select' && !portEl && !handleEl && !linkEndEl && !bendEl) {
+      const clickId = nodeId ?? linkEl?.getAttribute('data-link-id') ?? null;
+      const now = performance.now();
+      const lc = lastClick.current;
+      if (lc && clickId && lc.id === clickId && now - lc.t < 380 && Math.hypot(lc.x - e.clientX, lc.y - e.clientY) < 6) {
+        lastClick.current = null;
+        e.preventDefault(); // no compat mousedown → the inline editor keeps focus
+        s.select([clickId]);
+        setTimeout(() => startEditing(clickId), 0);
+        return;
+      }
+      lastClick.current = { t: now, id: clickId, x: e.clientX, y: e.clientY };
+    }
 
     if (handleEl) {
       const id = s.selection[0];
@@ -796,19 +812,6 @@ export function Canvas() {
               </g>
             );
           })}
-          {resizable && single && (() => {
-            const r = rectOf(single);
-            const hs = 8 * inv;
-            const pos: Record<Handle, Pt> = {
-              nw: { x: r.x, y: r.y }, n: { x: r.x + r.w / 2, y: r.y }, ne: { x: r.x + r.w, y: r.y }, e: { x: r.x + r.w, y: r.y + r.h / 2 },
-              se: { x: r.x + r.w, y: r.y + r.h }, s: { x: r.x + r.w / 2, y: r.y + r.h }, sw: { x: r.x, y: r.y + r.h }, w: { x: r.x, y: r.y + r.h / 2 },
-            };
-            return HANDLES.map((h) => (
-              <rect key={h} data-handle={h} x={pos[h].x - hs / 2} y={pos[h].y - hs / 2} width={hs} height={hs} rx={1.5 * inv}
-                fill="#fff" stroke={theme.selection} strokeWidth={1.3 * inv} style={{ cursor: HANDLE_CURSOR[h] }} />
-            ));
-          })()}
-
           {/* ports */}
           {[...devicePortsVisible].map((nid) => {
             const n = page.nodes[nid] as DeviceNode;
@@ -848,6 +851,19 @@ export function Canvas() {
           })}
 
           {linkPreview}
+          {resizable && single && (() => {
+            const r = rectOf(single);
+            const hs = 8 * inv;
+            const pos: Record<Handle, Pt> = {
+              nw: { x: r.x, y: r.y }, n: { x: r.x + r.w / 2, y: r.y }, ne: { x: r.x + r.w, y: r.y }, e: { x: r.x + r.w, y: r.y + r.h / 2 },
+              se: { x: r.x + r.w, y: r.y + r.h }, s: { x: r.x + r.w / 2, y: r.y + r.h }, sw: { x: r.x, y: r.y + r.h }, w: { x: r.x, y: r.y + r.h / 2 },
+            };
+            return HANDLES.map((h) => (
+              <rect key={h} data-handle={h} x={pos[h].x - hs / 2} y={pos[h].y - hs / 2} width={hs} height={hs} rx={1.5 * inv}
+                fill="#fff" stroke={theme.selection} strokeWidth={1.3 * inv} style={{ cursor: HANDLE_CURSOR[h] }} />
+            ));
+          })()}
+
 
           {/* guides */}
           <g pointerEvents="none" stroke="#ff3d71" strokeWidth={inv}>

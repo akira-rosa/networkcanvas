@@ -1,4 +1,4 @@
-import React, { useMemo, useState, type ReactNode } from 'react';
+import React, { useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   Plus, Search, Eye, EyeOff, Lock, Unlock, Box, SquareDashed, Type, Square, LayoutGrid, Table2, Spline, FileText, MoreHorizontal,
   Upload, Download, Image as ImageIcon, MessageSquare, PanelTop, Layers3,
@@ -98,6 +98,7 @@ function Library() {
   const libStyle = useStore((s) => s.libStyle);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [menu, setMenu] = useState<{ x: number; y: number; items: MenuItem[] } | null>(null);
+  const clickTimer = useRef<number | undefined>(undefined);
 
   const groups = useMemo(() => {
     const list = Object.values(defs)
@@ -172,8 +173,8 @@ function Library() {
                     draggable
                     title={`${d.name}${d.description ? ' — ' + d.description : ''}\n${d.ports.length} ports · drag onto canvas · double-click to edit`}
                     onDragStart={(e) => { e.dataTransfer.setData('application/x-netcanvas-def', d.id); e.dataTransfer.effectAllowed = 'copy'; }}
-                    onClick={() => addToCanvas(d)}
-                    onDoubleClick={() => s.openEditor(d)}
+                    onClick={() => { window.clearTimeout(clickTimer.current); clickTimer.current = window.setTimeout(() => addToCanvas(d), 260); }}
+                    onDoubleClick={() => { window.clearTimeout(clickTimer.current); s.openEditor(d); }}
                     onContextMenu={(e) => itemMenu(e, d)}
                   >
                     <div className="lib-thumb"><DefThumb def={d} size={40} /></div>
