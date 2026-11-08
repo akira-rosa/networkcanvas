@@ -16,7 +16,7 @@ Everything runs in the browser from one HTML file: no install, no account, no in
 ## Get it
 
 - **Download** `NetCanvas.html` from the [latest release](../../releases/latest) and double-click it. Chrome, Edge or Firefox. Works fully offline.
-- Or **use it online** at the project's GitHub Pages site (the same file, served).
+- Or **use it online**: <https://akira-rosa.github.io/netcanvas/> (the same file, served from GitHub Pages).
 - Diagrams autosave in your browser; use **File → Save to file** (`Ctrl+S`) for `.netcanvas.json` files you can version, share or back up.
 
 ## What it does
