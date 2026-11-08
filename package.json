@@ -1,0 +1,62 @@
+{
+  "name": "netcanvas",
+  "version": "0.3.0",
+  "description": "Offline, single-file network & OT diagram editor with port-aware links, VLAN-bound zones, two icon styles and a Figma-like device editor.",
+  "license": "MIT",
+  "author": "Akira Rosa",
+  "private": true,
+  "type": "module",
+  "homepage": "https://github.com/akira-rosa/netcanvas#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akira-rosa/netcanvas.git"
+  },
+  "bugs": {
+    "url": "https://github.com/akira-rosa/netcanvas/issues"
+  },
+  "keywords": [
+    "network-diagram",
+    "topology",
+    "network",
+    "ot",
+    "industrial",
+    "vlan",
+    "diagram",
+    "svg",
+    "offline",
+    "react"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build && node scripts/postbuild.mjs",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "node tests/e2e/smoke.mjs",
+    "sheet": "node scripts/sheet.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "5.3.0",
+    "idb-keyval": "6.3.0",
+    "immer": "11.2.9",
+    "lucide-react": "1.70.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "zustand": "5.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "playwright": "^1.63.0",
+    "typescript": "^5.6.0",
+    "vite": "8.3.6",
+    "vite-plugin-singlefile": "2.3.4",
+    "vitest": "^3.2.7"
+  }
+}
