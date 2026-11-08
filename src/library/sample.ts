@@ -6,7 +6,7 @@ import { uid } from '../model/util';
 // A sample diagram modelled on the Smart4.0 schematic, so the first launch
 // shows every feature (zones bound to VLANs, port-based links, legend, VLAN table).
 
-export const SAMPLE_VERSION = 4;
+export const SAMPLE_VERSION = 5;
 
 export function createSampleDoc(): DiagramDoc {
   const V = (vlanId: number, name: string, subnet: string, color: string, description: string): Vlan => ({ id: uid('v'), vlanId, name, subnet, color, description });
@@ -56,7 +56,7 @@ export function createSampleDoc(): DiagramDoc {
   zone('', vlans.prod, 40, 960, 2200, 420, 'right');
 
   // ── core ──
-  const fwGate = dev('firewall', 'FireWall', 1060, 110, [], { subtitle: 'Main Server System' });
+  const fwGate = dev('firewall', 'fwGate', 1060, 110, [], { subtitle: 'Main Server System' });
   const rtBorder = dev('router-industrial', 'rtBorder', 1060, 350, [[vlans.guest, '192.168.3.1'], [vlans.core, '192.168.2.1'], ['err', 'DHCP Client']]);
   const swHeart = dev('switch-l3', 'swHeart', 1060, 600, [[vlans.core, '192.168.2.10'], [vlans.server, '192.168.250.1']]);
   const rtProd = dev('router-industrial', 'rtProduction', 1060, 830, [[vlans.core, '192.168.2.20'], [vlans.prod, '192.168.150.1']]);
@@ -65,7 +65,7 @@ export function createSampleDoc(): DiagramDoc {
   link(swHeart, 'P0.7', rtProd, 'P1');
 
   // ── guest path ──
-  const fwGuest = dev('firewall', 'FireWall', 1275, 320, [], { subtitle: 'Guest Access' });
+  const fwGuest = dev('firewall', 'fwGuest', 1275, 320, [], { subtitle: 'Guest Access' });
   const rtGuest = dev('router-wireless', 'rtGuest', 1385, 320, [[vlans.visitors, '192.168.100.1'], [vlans.guest, '192.168.3.10']]);
   link(rtBorder, 'WAN', fwGuest, 'DMZ', { fromLabel: 'P1' });
   link(fwGuest, 'MGMT', rtGuest, 'P2', { label: 'WAN', showPortLabels: false });
@@ -90,15 +90,15 @@ export function createSampleDoc(): DiagramDoc {
   const gt = dev('iot-gateway', 'gtIOT', 830, 450, [[vlans.iot, '192.168.200.1'], [vlans.core, '192.168.2.40']]);
   link(swHeart, 'P0.2', gt, 'ETH2', { fromLabel: 'P0.5', toLabel: 'P1' });
   [
-    dev('iot-sensor', 'SmartSense', 660, 110, [[vlans.iot, '192.168.200.10']]),
-    dev('iot-sensor', 'SmartSense', 520, 170, [[vlans.iot, '192.168.200.20']]),
-    dev('iot-sensor', 'SmartSense', 460, 320, [[vlans.iot, '192.168.200.30']]),
-    dev('iot-sensor', 'SmartSense', 500, 480, [[vlans.iot, '192.168.200.40']]),
-    dev('iot-sensor', 'SmartSense', 620, 540, [[vlans.iot, '192.168.200.50']]),
+    dev('iot-sensor', 'SmartSense-1', 660, 110, [[vlans.iot, '192.168.200.10']]),
+    dev('iot-sensor', 'SmartSense-2', 520, 170, [[vlans.iot, '192.168.200.20']]),
+    dev('iot-sensor', 'SmartSense-3', 460, 320, [[vlans.iot, '192.168.200.30']]),
+    dev('iot-sensor', 'SmartSense-4', 500, 480, [[vlans.iot, '192.168.200.40']]),
+    dev('iot-sensor', 'SmartSense-5', 620, 540, [[vlans.iot, '192.168.200.50']]),
   ].forEach((s) => wifi(gt, s));
 
   // ── server ──
-  const fwSrv = dev('firewall', 'FireWall', 820, 760, [], { subtitle: 'Main Server System' });
+  const fwSrv = dev('firewall', 'fwServers', 820, 760, [], { subtitle: 'Main Server System' });
   const srv = dev('server', 'Main Server', 520, 750, [[vlans.server, '192.168.250.60']]);
   link(swHeart, 'P0.6', fwSrv, 'WAN', { fromLabel: 'P0.4', toLabel: '' });
   link(fwSrv, 'DMZ', srv, 'iLO', { toLabel: 'E1', fromLabel: '' });
@@ -117,17 +117,17 @@ export function createSampleDoc(): DiagramDoc {
 
   const storage = cell('Storage Switch', 340, [
     ['hmi', 'Storage HMI', '192.168.150.11'], ['plc-compact', 'Storage PLC', '192.168.150.10'],
-    ['motor-driver', 'YAW Driver', '192.168.150.12'], ['motor-driver', 'Y Axis Driver', '192.168.150.13'],
+    ['motor-driver', 'Storage YAW Drv', '192.168.150.12'], ['motor-driver', 'Storage Y Drv', '192.168.150.13'],
   ]);
   placeRow(storage.nodes, 110, 140);
   const process = cell('Process Switch', 790, [
     ['hmi', 'Process HMI', '192.168.150.21'], ['plc-compact', 'Process PLC', '192.168.150.20'],
-    ['motor-driver', 'X Axis Driver', '192.168.150.22'], ['motor-driver', 'Y Axis Driver', '192.168.150.23'],
+    ['motor-driver', 'Process X Drv', '192.168.150.22'], ['motor-driver', 'Process Y Drv', '192.168.150.23'],
   ]);
   placeRow(process.nodes, 640, 125);
   const expedition = cell('Expedition Switch', 1880, [
     ['hmi', 'Expedition HMI', '192.168.150.41'], ['plc-compact', 'Expedition PLC', '192.168.150.40'],
-    ['motor-driver', 'YAW Driver', '192.168.150.42'], ['motor-driver', 'X Axis Driver', '192.168.150.43'], ['motor-driver', 'Y Axis Driver', '192.168.150.44'],
+    ['motor-driver', 'Exp. YAW Drv', '192.168.150.42'], ['motor-driver', 'Exp. X Drv', '192.168.150.43'], ['motor-driver', 'Exp. Y Drv', '192.168.150.44'],
   ]);
   placeRow(expedition.nodes, 1660, 118);
 

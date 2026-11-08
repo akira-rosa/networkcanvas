@@ -11,7 +11,8 @@ import { newDocument, openFromFile, saveToFile, loadSample, importLibrary } from
 import { exportCableScheduleCsv, exportInventoryCsv, exportPdf, exportPng, exportSvg } from '../export/exporters';
 import type { Tool } from '../model/types';
 import { createCallout, createImage, createLegend, createTitleBlock, createVlanTable } from '../model/factory';
-import { pickFile, readFileDataUrl } from '../model/util';
+import { pickFile, readFileDataUrl, rectsIntersect, unionRects } from '../model/util';
+import { nodeRect } from '../model/geometry';
 
 const TOOLS: { id: Tool; title: string; key: string; icon: React.ReactNode }[] = [
   { id: 'select', title: 'Select / move', key: 'V', icon: <MousePointer2 size={17} /> },
@@ -32,12 +33,31 @@ export function TopBar() {
     setMenu({ x: r.left, y: r.bottom + 4, items });
   };
 
+  /** A spot of w×h that does not overlap existing content: below it (left-aligned), else to its right, else the view centre. */
+  const freeSpot = (w: number, h: number) => {
+    const c = canvasApi.center();
+    const pg = s.doc.pages.find((p) => p.id === s.pageId)!;
+    const rects = pg.order.map((id) => pg.nodes[id]).filter((n) => n && !n.hidden).map((n) => nodeRect(n, pg, s.defs, s.doc.vlans));
+    const bounds = unionRects(rects);
+    if (!bounds) return { x: c.x - w / 2, y: c.y - h / 2 };
+    const gap = 40;
+    const free = (r: { x: number; y: number; w: number; h: number }) => !rects.some((o) => rectsIntersect({ x: r.x - 12, y: r.y - 12, w: r.w + 24, h: r.h + 24 }, o));
+    const candidates = [
+      { x: bounds.x, y: bounds.y + bounds.h + gap, w, h },
+      { x: bounds.x + bounds.w - w, y: bounds.y + bounds.h + gap, w, h },
+      { x: bounds.x + bounds.w + gap, y: bounds.y, w, h },
+      { x: bounds.x + bounds.w + gap, y: bounds.y + bounds.h - h, w, h },
+    ];
+    const spot = candidates.find(free) ?? candidates[0];
+    return { x: Math.round(spot.x), y: Math.round(spot.y) };
+  };
+
   const placeBlock = (kind: 'legend' | 'vlanTable' | 'titleBlock' | 'callout') => {
     const c = canvasApi.center();
     let n;
-    if (kind === 'legend') n = createLegend(c.x - 200, c.y - 60);
-    else if (kind === 'vlanTable') n = createVlanTable(c.x - 250, c.y - 100);
-    else if (kind === 'titleBlock') n = createTitleBlock(c.x - 170, c.y - 46);
+    if (kind === 'legend') { const p = freeSpot(420, 110); n = createLegend(p.x, p.y); }
+    else if (kind === 'vlanTable') { const p = freeSpot(520, 40 + 22 * Math.max(1, s.doc.vlans.length)); n = createVlanTable(p.x, p.y); }
+    else if (kind === 'titleBlock') { const p = freeSpot(340, 92); n = createTitleBlock(p.x, p.y); }
     else {
       // callout: attach to the selected device when there is one
       const pg = s.doc.pages.find((p) => p.id === s.pageId)!;
@@ -46,6 +66,7 @@ export function TopBar() {
     }
     s.change((_d, pg) => { pg.nodes[n.id] = n; pg.order.push(n.id); });
     s.select([n.id]);
+    if (kind !== 'callout') canvasApi.reveal([n.id]);
   };
   const insertImage = async () => {
     const f = await pickFile('image/*,.svg');

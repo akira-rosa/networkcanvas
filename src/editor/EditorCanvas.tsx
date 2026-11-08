@@ -220,7 +220,9 @@ export function EditorCanvas() {
       if (s) { st.begin(); setDrag({ kind: 'resize', id: s.id, handle: hEl.getAttribute('data-handle') as Handle, orig: shapeRect(s) }); }
       return;
     }
-    const id = t.closest('[data-pid]')?.getAttribute('data-pid') ?? t.closest('[data-sid]')?.getAttribute('data-sid');
+    // a click on a segment of the polygon being point-edited acts on that polygon (stays in point-editing mode)
+    const segHit = st.editPoints && t.closest('[data-seg]') ? st.editPoints : undefined;
+    const id = t.closest('[data-pid]')?.getAttribute('data-pid') ?? t.closest('[data-sid]')?.getAttribute('data-sid') ?? segHit;
     if (id) {
       if (st.editPoints && st.editPoints !== id) st.set({ editPoints: null });
       let sel = st.selection;

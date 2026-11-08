@@ -3,7 +3,7 @@ import {
   Plus, Search, Eye, EyeOff, Lock, Unlock, Box, SquareDashed, Type, Square, LayoutGrid, Table2, Spline, FileText, MoreHorizontal,
   Upload, Download, Image as ImageIcon, MessageSquare, PanelTop, Layers3,
 } from 'lucide-react';
-import { useStore, usePage, placementDefId } from '../store/store';
+import { useStore, usePage, placementDefId, defUsage } from '../store/store';
 import { DefThumb } from '../render/ShapeView';
 import { CATEGORY_ORDER, DEFAULT_ACCENT } from '../library';
 import type { DeviceDef, DiagramNode } from '../model/types';
@@ -102,7 +102,7 @@ function Library() {
 
   const groups = useMemo(() => {
     const list = Object.values(defs)
-      .filter((d) => libStyle === 'all' || !d.style || d.style === libStyle)
+      .filter((d) => libStyle === 'all' || (d.style ?? 'iso') === libStyle)
       .filter((d) => !q || (d.name + ' ' + d.category + ' ' + (d.description ?? '') + ' ' + (d.vendor ?? '')).toLowerCase().includes(q.toLowerCase()));
     const g: Record<string, DeviceDef[]> = {};
     list.forEach((d) => (g[d.category] ??= []).push(d));
@@ -117,7 +117,16 @@ function Library() {
 
   const addToCanvas = (d: DeviceDef) => {
     const c = canvasApi.center();
-    const n = createDevice(d, c.x, c.y, placementDefId(defs, d, docStyle));
+    const st = useStore.getState();
+    const pg0 = st.doc.pages.find((p) => p.id === st.pageId)!;
+    // step down-right while the spot is taken, so repeated clicks do not pile devices on top of each other
+    let cx = c.x, cy = c.y;
+    for (let i = 0; i < 12; i++) {
+      const taken = Object.values(pg0.nodes).some((n) => n.kind === 'device' && Math.abs(n.x + n.w / 2 - cx) < 20 && Math.abs(n.y + n.h / 2 - cy) < 20);
+      if (!taken) break;
+      cx += 32; cy += 32;
+    }
+    const n = createDevice(d, cx, cy, placementDefId(defs, d, docStyle));
     s.change((_doc, pg) => { pg.nodes[n.id] = n; pg.order.push(n.id); });
     s.select([n.id]);
   };
@@ -135,7 +144,10 @@ function Library() {
         { sep: true },
         isOverride
           ? { label: 'Reset to built-in', action: () => s.deleteUserDef(d.id) }
-          : { label: 'Delete from library', danger: true, disabled: !isUser, action: () => s.deleteUserDef(d.id) },
+          : { label: 'Delete from library', danger: true, disabled: !isUser, action: () => {
+              const used = defUsage(s.doc, d.id);
+              if (confirm(`Delete “${d.name}” from your library?${used ? `\n\n${used} device${used > 1 ? 's' : ''} in this diagram use it; they keep working (a copy stays embedded in the document).` : ''}`)) s.deleteUserDef(d.id);
+            } },
       ],
     });
   };

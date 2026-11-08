@@ -9,7 +9,7 @@ import { useEditor, nextPortName, type ETool } from './editorStore';
 import { EditorCanvas, editorApi } from './EditorCanvas';
 import { useStore } from '../store/store';
 import type { DeviceDef, PortDef, PortMedia, Shape, Side } from '../model/types';
-import { IconButton, Section, Row, TextInput, NumInput, Select, Toggle, ColorInput, TextArea } from '../ui/controls';
+import { IconButton, Section, Row, TextInput, NumInput, Select, Toggle, ColorInput, TextArea, GestureContext } from '../ui/controls';
 import { DeviceGraphic } from '../render/ShapeView';
 import { DeviceLabel } from '../render/DiagramLayer';
 import { canvasThemes, MEDIA_COLORS } from '../render/theme';
@@ -101,6 +101,7 @@ export function DeviceEditor() {
   }, []);
 
   return (
+    <GestureContext.Provider value={editorGesture}>
     <div className="editor">
       <header className="topbar">
         <div className="topbar-left">
@@ -134,8 +135,11 @@ export function DeviceEditor() {
         <EditorInspector />
       </div>
     </div>
+    </GestureContext.Provider>
   );
 }
+
+const editorGesture = { begin: () => useEditor.getState().begin(), end: () => useEditor.getState().end() };
 
 type StyleClip = Pick<Shape, 'fill' | 'stroke' | 'strokeWidth' | 'dash' | 'opacity' | 'gradient'> & { radius?: number; radii?: [number, number, number, number] };
 let styleClip: StyleClip | null = null;
@@ -446,7 +450,7 @@ function PortInspector({ p }: { p: PortDef }) {
         <IconButton title="Delete" onClick={deleteSelection}><Trash2 size={15} /></IconButton></div>
       <Section title="Port">
         <Row label="Name"><TextInput value={p.name} onChange={(v) => upd((x) => { x.name = v || x.name; })} /></Row>
-        <Row label="Media"><Select value={p.media} options={MEDIA} onChange={(v) => upd((x) => { x.media = v; if (v === 'wireless' && x.maxLinks === 1) x.maxLinks = 0; })} /></Row>
+        <Row label="Media"><Select value={p.media} options={MEDIA} onChange={(v) => upd((x) => { const wasWireless = x.media === 'wireless'; x.media = v; if (v === 'wireless' && x.maxLinks === 1) x.maxLinks = 0; else if (wasWireless && v !== 'wireless' && x.maxLinks === 0) x.maxLinks = 1; })} /></Row>
         <Row label="Max links"><NumInput value={p.maxLinks} min={0} precision={0} onChange={(v) => upd((x) => { x.maxLinks = Math.round(v); })} /></Row>
         <div className="hint">0 = unlimited (e.g. a Wi-Fi radio or a cloud). Links between incompatible media are refused on the canvas.</div>
         <Row label="Exit side"><Select value={p.side} options={SIDES} onChange={(v) => upd((x) => { x.side = v; })} /></Row>

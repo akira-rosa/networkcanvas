@@ -287,8 +287,12 @@ export const useStore = create<State>((set, get) => ({
   deletePage: (id) => {
     const { doc } = get();
     if (doc.pages.length <= 1) return get().toast('A document needs at least one page', 'error');
+    const idx = doc.pages.findIndex((p) => p.id === id);
     get().change((d) => { d.pages = d.pages.filter((p) => p.id !== id); });
-    set({ pageId: get().doc.pages[0].id, selection: [] });
+    // stay on the current page; when it was the one deleted, move to its neighbour
+    const pages = get().doc.pages;
+    const pageId = get().pageId === id ? pages[Math.max(0, Math.min(idx - 1, pages.length - 1))].id : get().pageId;
+    set({ pageId, selection: get().pageId === id ? [] : get().selection });
   },
 
   select: (ids, mode = 'replace') => {
@@ -427,7 +431,15 @@ export const useStore = create<State>((set, get) => ({
     const saved = { ...def, builtin: false, updatedAt: Date.now(), version: (def.version ?? 0) + 1 };
     get().setUserDefs([...list, saved]);
   },
-  deleteUserDef: (id) => get().setUserDefs(get().userDefs.filter((d) => d.id !== id)),
+  deleteUserDef: (id) => {
+    const { userDefs, doc } = get();
+    const def = userDefs.find((d) => d.id === id);
+    // instances in the open document keep rendering: the definition moves to the document's embedded copies
+    if (def && defUsage(doc, id) && !(doc.embeddedDefs ?? []).some((d) => d.id === id)) {
+      set({ doc: { ...doc, embeddedDefs: [...(doc.embeddedDefs ?? []), { ...def, builtin: false }] }, dirty: true });
+    }
+    get().setUserDefs(userDefs.filter((d) => d.id !== id));
+  },
   openEditor: (def, isNew = false) => set({ editor: { def: deepClone(def), isNew }, modal: null }),
 }));
 
@@ -457,6 +469,13 @@ function refitDevice(n: DeviceNode, from?: DeviceDef, to?: DeviceDef) {
   n.h = Math.round(to.h * k * 100) / 100;
   n.x = Math.round((cx - n.w / 2) * 100) / 100;
   n.y = Math.round((cy - n.h / 2) * 100) / 100;
+}
+
+/** number of device instances of a definition across all pages of a document */
+export function defUsage(doc: DiagramDoc, id: string): number {
+  let n = 0;
+  doc.pages.forEach((p) => Object.values(p.nodes).forEach((x) => { if (x.kind === 'device' && rawDefId(x.defId) === id) n++; }));
+  return n;
 }
 
 /** custom definitions used in a document, embedded so the file is portable */

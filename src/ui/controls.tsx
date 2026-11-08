@@ -1,4 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+
+/** Lets scrubbable controls record one undo step per drag gesture (provided by the inspector / editor). */
+export const GestureContext = createContext<{ begin: () => void; end: () => void } | null>(null);
 
 export function Section({ title, children, actions, collapsible = false }: { title: string; children: React.ReactNode; actions?: React.ReactNode; collapsible?: boolean }) {
   const [open, setOpen] = useState(true);
@@ -27,6 +30,7 @@ export function TextInput({
   value, onChange, placeholder, mono, className, prefix, autoFocus,
 }: { value: string; onChange: (v: string) => void; placeholder?: string; mono?: boolean; className?: string; prefix?: React.ReactNode; autoFocus?: boolean }) {
   const [v, setV] = useState(value);
+  const cancelled = useRef(false);
   useEffect(() => setV(value), [value]);
   return (
     <div className={'input-wrap ' + (className ?? '')}>
@@ -37,11 +41,11 @@ export function TextInput({
         placeholder={placeholder}
         autoFocus={autoFocus}
         onChange={(e) => setV(e.target.value)}
-        onBlur={() => v !== value && onChange(v)}
+        onBlur={() => { if (cancelled.current) { cancelled.current = false; setV(value); return; } if (v !== value) onChange(v); }}
         onKeyDown={(e) => {
           e.stopPropagation();
           if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
-          if (e.key === 'Escape') { setV(value); (e.target as HTMLInputElement).blur(); }
+          if (e.key === 'Escape') { cancelled.current = true; setV(value); (e.target as HTMLInputElement).blur(); }
         }}
       />
     </div>
@@ -50,10 +54,13 @@ export function TextInput({
 
 export function TextArea({ value, onChange, rows = 3, placeholder }: { value: string; onChange: (v: string) => void; rows?: number; placeholder?: string }) {
   const [v, setV] = useState(value);
+  const cancelled = useRef(false);
   useEffect(() => setV(value), [value]);
   return (
     <textarea className="input textarea" rows={rows} value={v} placeholder={placeholder}
-      onChange={(e) => setV(e.target.value)} onBlur={() => v !== value && onChange(v)} onKeyDown={(e) => e.stopPropagation()} />
+      onChange={(e) => setV(e.target.value)}
+      onBlur={() => { if (cancelled.current) { cancelled.current = false; setV(value); return; } if (v !== value) onChange(v); }}
+      onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Escape') { cancelled.current = true; setV(value); (e.target as HTMLTextAreaElement).blur(); } }} />
   );
 }
 
@@ -65,15 +72,22 @@ export function NumInput({
   const [v, setV] = useState(fmt(value));
   useEffect(() => setV(fmt(value)), [value]);
   const clampV = (n: number) => Math.min(max ?? Infinity, Math.max(min ?? -Infinity, n));
-  const drag = useRef<{ x: number; v: number } | null>(null);
+  const drag = useRef<{ x: number; v: number; begun: boolean } | null>(null);
+  const cancelled = useRef(false);
+  const gesture = useContext(GestureContext);
   return (
     <div className="input-wrap num">
       {label && (
         <span
           className="input-prefix scrub"
-          onPointerDown={(e) => { drag.current = { x: e.clientX, v: value }; (e.target as Element).setPointerCapture(e.pointerId); }}
-          onPointerMove={(e) => { if (drag.current) onChange(clampV(drag.current.v + Math.round((e.clientX - drag.current.x) / 2) * step)); }}
-          onPointerUp={() => { drag.current = null; }}
+          onPointerDown={(e) => { drag.current = { x: e.clientX, v: value, begun: false }; (e.target as Element).setPointerCapture(e.pointerId); }}
+          onPointerMove={(e) => {
+            const d = drag.current;
+            if (!d) return;
+            if (!d.begun) { d.begun = true; gesture?.begin(); }
+            onChange(clampV(d.v + Math.round((e.clientX - d.x) / 2) * step));
+          }}
+          onPointerUp={() => { if (drag.current?.begun) gesture?.end(); drag.current = null; }}
         >
           {label}
         </span>
@@ -82,10 +96,11 @@ export function NumInput({
         className="input"
         value={v}
         onChange={(e) => setV(e.target.value)}
-        onBlur={() => { const n = parseFloat(v); if (!isNaN(n) && n !== value) onChange(clampV(n)); else setV(fmt(value)); }}
+        onBlur={() => { if (cancelled.current) { cancelled.current = false; setV(fmt(value)); return; } const n = parseFloat(v); if (!isNaN(n) && n !== value) onChange(clampV(n)); else setV(fmt(value)); }}
         onKeyDown={(e) => {
           e.stopPropagation();
           if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+          if (e.key === 'Escape') { cancelled.current = true; setV(fmt(value)); (e.target as HTMLInputElement).blur(); }
           if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
             e.preventDefault();
             const d = (e.key === 'ArrowUp' ? 1 : -1) * step * (e.shiftKey ? 10 : 1);

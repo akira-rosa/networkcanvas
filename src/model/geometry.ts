@@ -158,6 +158,9 @@ export interface LinkGeom {
   end: Pt;
   startDir: Pt;
   endDir: Pt;
+  /** exit directions at each end (away from the device), used for orthogonal bend editing */
+  exitStart: Pt;
+  exitEnd: Pt;
   mid: Pt;
   midDir: Pt;
   arrowStart?: string;
@@ -217,17 +220,50 @@ function simplify(pts: Pt[]): Pt[] {
   return out;
 }
 
+const ORTHO_GAP = 16;
+/** px of bend-handle travel represented by bend 0..1 when both ends exit on the same side */
+const SAME_SIDE_SPAN = 400;
+
+/** Position of the movable middle segment of an orthogonal route (x when the ends exit horizontally, y otherwise). */
+function orthoMidCoord(s1: Pt, ds: Pt, e1: Pt, de: Pt, bend: number): number {
+  const horiz = ds.x !== 0;
+  const a = horiz ? s1.x : s1.y, b = horiz ? e1.x : e1.y;
+  const same = ds.x === de.x && ds.y === de.y;
+  if (!same) return a + (b - a) * bend;
+  // both ends leave on the same side: the segment sits past the outermost stub and the bend pushes it further out
+  const sign = horiz ? ds.x : ds.y;
+  const base = sign < 0 ? Math.min(a, b) : Math.max(a, b);
+  return base + (bend - 0.5) * SAME_SIDE_SPAN;
+}
+
+/** Inverse of orthoMidCoord: the bend value that puts the middle segment through point p. */
+export function orthoBendAt(s: Pt, ds: Pt, e: Pt, de: Pt, p: Pt): number {
+  const s1 = { x: s.x + ds.x * ORTHO_GAP, y: s.y + ds.y * ORTHO_GAP };
+  const e1 = { x: e.x + de.x * ORTHO_GAP, y: e.y + de.y * ORTHO_GAP };
+  const sH = ds.x !== 0, eH = de.x !== 0;
+  if (sH !== eH) return 0.5;
+  const v = sH ? p.x : p.y;
+  const a = sH ? s1.x : s1.y, b = sH ? e1.x : e1.y;
+  const same = ds.x === de.x && ds.y === de.y;
+  if (same) {
+    const sign = sH ? ds.x : ds.y;
+    const base = sign < 0 ? Math.min(a, b) : Math.max(a, b);
+    return Math.max(-1, Math.min(2, 0.5 + (v - base) / SAME_SIDE_SPAN));
+  }
+  return b === a ? 0.5 : Math.max(-1, Math.min(2, (v - a) / (b - a)));
+}
+
 function orthoRoute(s: Pt, ds: Pt, e: Pt, de: Pt, bend = 0.5): Pt[] {
-  const gap = 16;
+  const gap = ORTHO_GAP;
   const s1 = { x: s.x + ds.x * gap, y: s.y + ds.y * gap };
   const e1 = { x: e.x + de.x * gap, y: e.y + de.y * gap };
   const sH = ds.x !== 0, eH = de.x !== 0;
   let mid: Pt[];
   if (sH && eH) {
-    const mx = s1.x + (e1.x - s1.x) * bend;
+    const mx = orthoMidCoord(s1, ds, e1, de, bend);
     mid = [{ x: mx, y: s1.y }, { x: mx, y: e1.y }];
   } else if (!sH && !eH) {
-    const my = s1.y + (e1.y - s1.y) * bend;
+    const my = orthoMidCoord(s1, ds, e1, de, bend);
     mid = [{ x: s1.x, y: my }, { x: e1.x, y: my }];
   } else if (sH && !eH) {
     mid = [{ x: e1.x, y: s1.y }];
@@ -359,7 +395,7 @@ export function linkGeometry(link: Link, page: Page, defs: DefMap, vlans: Vlan[]
     mid = r.p;
     midDir = r.dir;
   }
-  return { d, pts, linePts: link.routing === 'curved' ? undefined : P, routing: link.routing, start: s, end: e, startDir, endDir, mid, midDir, arrowStart, arrowEnd, fromPort: A.port, toPort: B.port };
+  return { d, pts, linePts: link.routing === 'curved' ? undefined : P, routing: link.routing, start: s, end: e, startDir, endDir, exitStart: ds, exitEnd: de, mid, midDir, arrowStart, arrowEnd, fromPort: A.port, toPort: B.port };
 }
 
 function roundedPolyline(pts: Pt[], r: number): string {

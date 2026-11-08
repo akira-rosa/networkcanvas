@@ -340,7 +340,11 @@ export function dashArray(l: Pick<Link, 'dash' | 'width'>) {
   return undefined;
 }
 
-export function LinkView({ link, g, theme, interactive, bgAt, clear, byMedia, d, hidePorts }: { link: Link; g: LinkGeom; theme: CanvasTheme; interactive?: boolean; bgAt?: (x: number, y: number) => string; clear?: [number, number]; byMedia?: boolean; d?: string; hidePorts?: boolean }) {
+/**
+ * A link. `part` splits the drawing so lines can sit under the devices while arrowheads and
+ * labels are painted above them: 'line' = hit area + stroke, 'deco' = arrows + labels, 'all' = both.
+ */
+export function LinkView({ link, g, theme, interactive, bgAt, clear, byMedia, d, hidePorts, part = 'all' }: { link: Link; g: LinkGeom; theme: CanvasTheme; interactive?: boolean; bgAt?: (x: number, y: number) => string; clear?: [number, number]; byMedia?: boolean; d?: string; hidePorts?: boolean; part?: 'line' | 'deco' | 'all' }) {
   const color = linkColor(link, theme, byMedia);
   const path = d ?? g.d;
   const meta = linkMetaText(link);
@@ -354,11 +358,15 @@ export function LinkView({ link, g, theme, interactive, bgAt, clear, byMedia, d,
   const fl = labelPos(g.start, g.startDir, 16 + (clear?.[0] ?? 0), 10);
   const tl = labelPos(g.end, { x: -g.endDir.x, y: -g.endDir.y }, 20 + (clear?.[1] ?? 0), -10);
   const ml = labelPos(g.mid, g.midDir.x < 0 ? { x: -g.midDir.x, y: -g.midDir.y } : g.midDir, 0, -9);
-  return (
-    <g data-link-id={interactive ? link.id : undefined} style={interactive ? { cursor: 'pointer' } : undefined}>
+  const line = part !== 'deco' && (
+    <>
       {interactive && <path d={path} stroke="transparent" strokeWidth={12} fill="none" />}
       <path d={path} stroke={color} strokeWidth={link.width} fill="none" strokeDasharray={dashArray(link)}
         strokeLinecap={link.dash === 'dotted' ? 'round' : 'butt'} strokeLinejoin="round" />
+    </>
+  );
+  const deco = part !== 'line' && (
+    <>
       {g.arrowEnd && <path d={g.arrowEnd} fill={color} />}
       {g.arrowStart && <path d={g.arrowStart} fill={color} />}
       <g fontFamily={FONT} fontSize={9.5} fontWeight={700} fill={color} style={{ userSelect: 'none' }}>
@@ -366,6 +374,13 @@ export function LinkView({ link, g, theme, interactive, bgAt, clear, byMedia, d,
         {toText && <text x={tl.x} y={tl.y} textAnchor="middle" dominantBaseline="central" {...halo(tl)}>{toText}</text>}
         {meta && <text x={ml.x} y={ml.y} textAnchor="middle" dominantBaseline="central" {...halo(ml)}>{meta}</text>}
       </g>
+    </>
+  );
+  if (part === 'deco') return <g pointerEvents="none">{deco}</g>;
+  return (
+    <g data-link-id={interactive ? link.id : undefined} style={interactive ? { cursor: 'pointer' } : undefined}>
+      {line}
+      {deco}
     </g>
   );
 }
@@ -408,8 +423,13 @@ export function NodeView({ n, props, bgAt }: { n: DiagramNode; props: LayerProps
   return <g {...data} style={pe}>{body}<PageLinkBadge n={n} theme={theme} interactive={interactive} /></g>;
 }
 
-/** Pure renderer for a page: used for the live canvas and for SVG/PNG export. */
-export function DiagramLayer(props: LayerProps & { linkOverride?: Record<string, Partial<Link>> }) {
+/**
+ * Pure renderer for a page: used for the live canvas and for SVG/PNG export.
+ * Memoised so panning, zooming and selection changes (which only touch the overlays) do not re-render the diagram.
+ */
+export const DiagramLayer = React.memo(DiagramLayerImpl);
+
+function DiagramLayerImpl(props: LayerProps & { linkOverride?: Record<string, Partial<Link>> }) {
   const { page, defs, vlans, theme, interactive, linkColorByMedia, lineJumps } = props;
   const drawn: Pt[][] = [];
   // links between the same two devices that don't use ports would overlap: fan them out
@@ -437,16 +457,14 @@ export function DiagramLayer(props: LayerProps & { linkOverride?: Record<string,
     const z = zones.find((r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h);
     return z ? z.fill || theme.zoneFill : theme.bg;
   };
-  return (
-    <g>
-      {bg.map((n) => <NodeView key={n.id} n={n} props={props} />)}
-      <g>
-        {Object.values(page.links).map((l) => {
+  // links are resolved once; their lines go under the devices, arrowheads and labels above them
+  const linkViews: { l: Link; g: LinkGeom; clear: [number, number]; d?: string }[] = [];
+  for (const l of Object.values(page.links)) {
           const fromN = page.nodes[l.from.node], toN = page.nodes[l.to.node];
-          if (!fromN || !toN || fromN.hidden || toN.hidden) return null;
-          if (layerHidden(props.layers, l.layerId) || layerHidden(props.layers, fromN.layerId) || layerHidden(props.layers, toN.layerId)) return null;
+          if (!fromN || !toN || fromN.hidden || toN.hidden) continue;
+          if (layerHidden(props.layers, l.layerId) || layerHidden(props.layers, fromN.layerId) || layerHidden(props.layers, toN.layerId)) continue;
           const g = linkGeometry(l, page, defs, vlans, parallel.has(l.id) ? { parallel: parallel.get(l.id) } : undefined);
-          if (!g) return null;
+          if (!g) continue;
           // push port labels past the device's own label when the link leaves on that side
           const clearFor = (n: DiagramNode, dir: { x: number; y: number }) => {
             if (n.kind !== 'device' || n.labelPos === 'none') return 0;
@@ -460,10 +478,22 @@ export function DiagramLayer(props: LayerProps & { linkOverride?: Record<string,
             d = pathWithJumps(g.linePts, drawn, 3.5 + l.width * 0.6);
             drawn.push(g.linePts);
           }
-          return <LinkView key={l.id} link={l} g={g} theme={theme} interactive={interactive} bgAt={bgAt} clear={clear} byMedia={linkColorByMedia} d={d} hidePorts={props.hidePortLabels} />;
-        })}
+          linkViews.push({ l, g, clear, d });
+  }
+  return (
+    <g>
+      {bg.map((n) => <NodeView key={n.id} n={n} props={props} />)}
+      <g>
+        {linkViews.map(({ l, g, clear, d }) => (
+          <LinkView key={l.id} link={l} g={g} theme={theme} interactive={interactive} bgAt={bgAt} clear={clear} byMedia={linkColorByMedia} d={d} hidePorts={props.hidePortLabels} part="line" />
+        ))}
       </g>
       {fg.map((n) => <NodeView key={n.id} n={n} props={props} bgAt={bgAt} />)}
+      <g>
+        {linkViews.map(({ l, g, clear, d }) => (
+          <LinkView key={l.id} link={l} g={g} theme={theme} interactive={interactive} bgAt={bgAt} clear={clear} byMedia={linkColorByMedia} d={d} hidePorts={props.hidePortLabels} part="deco" />
+        ))}
+      </g>
     </g>
   );
 }

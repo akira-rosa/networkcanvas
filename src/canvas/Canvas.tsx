@@ -4,7 +4,7 @@ import { DiagramLayer, dashArray, layerHidden, layerLocked } from '../render/Dia
 import { canvasThemes, MEDIA_COLORS, FONT } from '../render/theme';
 import type { DeviceNode, DiagramNode, Endpoint, Link, PortDef, Viewport } from '../model/types';
 import {
-  linkGeometry, linkMediaFor, mediaCompatible, nodeRect, nodeVisualRect, pickPort, portFree, portUsage, portWorld,
+  linkGeometry, linkMediaFor, mediaCompatible, nodeRect, nodeVisualRect, orthoBendAt, pickPort, portFree, portUsage, portWorld,
 } from '../model/geometry';
 import { clamp, modKey, normRect, rectContains, rectsIntersect, snap, unionRects, type Pt, type Rect } from '../model/util';
 import { createDevice, createRect, createText, createZone, newLink } from '../model/factory';
@@ -19,6 +19,8 @@ type Drag =
   | {
       kind: 'move'; start: Pt; ids: string[]; origin: Record<string, Pt>; startRect: Rect;
       clickedId: string; moved: boolean; shift: boolean; targets: { xs: number[]; ys: number[] };
+      /** Shift-click on an already selected unit: deselect it on release if the pointer did not move */
+      toggleOff?: string[];
     }
   | { kind: 'resize'; id: string; handle: Handle; start: Pt; orig: Rect; begun: boolean }
   | { kind: 'link'; from: Endpoint; fromMedia?: PortDef['media']; cur: Pt; target?: Endpoint | null; invalid?: string; relink?: { id: string; end: 'from' | 'to' } }
@@ -363,15 +365,15 @@ export function Canvas() {
       const gid = page.nodes[nodeId].groupId;
       // a grouped node selects its whole group unless Ctrl/⌘ is held
       const unit = gid && !modKey(e) ? page.order.filter((id) => page.nodes[id]?.groupId === gid) : [nodeId];
+      let toggleOff: string[] | undefined;
       if (e.shiftKey) {
-        s.select(unit, 'toggle');
-        sel = store().selection;
-        if (!sel.includes(nodeId)) return;
+        if (unit.every((id) => sel.includes(id))) toggleOff = unit; // decided on release: a plain click deselects, a drag moves
+        else { s.select(unit, 'toggle'); sel = store().selection; }
       } else if (!sel.includes(nodeId) || (gid && !modKey(e) && !unit.every((id) => sel.includes(id)))) {
         s.select(unit);
         sel = unit;
       }
-      startMove(sel, w, nodeId, e.altKey);
+      startMove(sel, w, nodeId, e.altKey, toggleOff);
       return;
     }
     if (linkEl) {
@@ -383,7 +385,7 @@ export function Canvas() {
     setDrag({ kind: 'marquee', start: w, cur: w, base: e.shiftKey ? s.selection : [], additive: e.shiftKey });
   };
 
-  function startMove(sel: string[], w: Pt, clickedId: string, alt: boolean) {
+  function startMove(sel: string[], w: Pt, clickedId: string, alt: boolean, toggleOff?: string[]) {
     const pg = currentPage();
     const s = store();
     const ids = new Set(sel.filter((id) => pg.nodes[id] && !pg.nodes[id].locked && !layerLocked(doc.layers, pg.nodes[id].layerId)));
@@ -413,7 +415,7 @@ export function Canvas() {
       ys.push(r.y, r.y + r.h / 2, r.y + r.h);
     }
     void s;
-    setDrag({ kind: 'move', start: w, ids: moving, origin, startRect, clickedId, moved: false, shift: false, targets: { xs, ys } });
+    setDrag({ kind: 'move', start: w, ids: moving, origin, startRect, clickedId, moved: false, shift: false, targets: { xs, ys }, toggleOff });
   }
 
   const onPointerMove = (e: React.PointerEvent) => {
@@ -532,11 +534,7 @@ export function Canvas() {
         const g = linkGeometry({ ...l, bend: 0.5 }, pg, defs, doc.vlans);
         if (!g) return;
         if (!d.begun) { s.beginGesture(); setDrag({ ...d, begun: true }); }
-        const horiz = Math.abs(g.startDir.x) > 0.5;
-        const a = horiz ? g.start.x + g.startDir.x * 16 : g.start.y + g.startDir.y * 16;
-        const b = horiz ? g.end.x - g.endDir.x * 16 : g.end.y - g.endDir.y * 16;
-        const v = horiz ? w.x : w.y;
-        const bend = b === a ? 0.5 : clamp((v - a) / (b - a), -1, 2);
+        const bend = orthoBendAt(g.start, g.exitStart, g.end, g.exitEnd, w);
         s.change((_doc, p) => { p.links[d.id].bend = Math.round(bend * 1000) / 1000; }, false);
         break;
       }
@@ -553,6 +551,7 @@ export function Canvas() {
     switch (d.kind) {
       case 'move':
         if (d.moved) s.endGesture();
+        else if (d.toggleOff) s.select(d.toggleOff, 'toggle');
         else if (!e.shiftKey && s.selection.length > 1) s.select([d.clickedId]);
         break;
       case 'resize':
@@ -781,37 +780,6 @@ export function Canvas() {
               return <rect x={b.x} y={b.y} width={b.w} height={b.h} fill="none" stroke={theme.selection} strokeWidth={inv} strokeDasharray={`${4 * inv} ${3 * inv}`} />;
             })()}
           </g>
-          {selLinks.map((l) => {
-            const g = linkGeometry(l, page, defs, doc.vlans);
-            if (!g) return null;
-            return (
-              <g key={l.id} style={readOnly ? { pointerEvents: 'none' } : undefined}>
-                <path d={g.d} stroke={theme.selection} strokeWidth={l.width + 3 * inv} fill="none" opacity={0.45} pointerEvents="none" strokeDasharray={dashArray(l)} />
-                {!readOnly && <circle data-link-end={`${l.id}|from`} cx={g.start.x} cy={g.start.y} r={5 * inv} fill="#fff" stroke={theme.selection} strokeWidth={1.5 * inv} style={{ cursor: 'move' }} />}
-                {!readOnly && <circle data-link-end={`${l.id}|to`} cx={g.end.x} cy={g.end.y} r={5 * inv} fill="#fff" stroke={theme.selection} strokeWidth={1.5 * inv} style={{ cursor: 'move' }} />}
-                {!readOnly && l.routing === 'orthogonal' && (
-                  <rect data-bend={l.id} x={g.mid.x - 5 * inv} y={g.mid.y - 5 * inv} width={10 * inv} height={10 * inv} rx={2 * inv}
-                    fill={theme.selection} stroke="#fff" strokeWidth={1.2 * inv} style={{ cursor: Math.abs(g.startDir.x) > 0.5 ? 'ew-resize' : 'ns-resize' }} />
-                )}
-                {!readOnly && l.routing === 'straight' && (() => {
-                  const pts = g.pts;
-                  const wps = l.waypoints ?? [];
-                  return (
-                    <g>
-                      {pts.slice(0, -1).map((p, i) => {
-                        const q = pts[i + 1];
-                        const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2;
-                        return <circle key={'a' + i} data-wp-add={`${l.id}|${i}`} cx={mx} cy={my} r={4 * inv} fill={theme.bg} stroke={theme.selection} strokeWidth={1.2 * inv} strokeDasharray={`${2 * inv} ${1.5 * inv}`} style={{ cursor: 'copy' }}><title>Drag to add a bend point</title></circle>;
-                      })}
-                      {wps.map((p, i) => (
-                        <rect key={'w' + i} data-wp={`${l.id}|${i}`} x={p.x - 4.5 * inv} y={p.y - 4.5 * inv} width={9 * inv} height={9 * inv} rx={2 * inv} fill={theme.selection} stroke="#fff" strokeWidth={1.2 * inv} style={{ cursor: 'move' }}><title>Drag to move · Alt+click to remove</title></rect>
-                      ))}
-                    </g>
-                  );
-                })()}
-              </g>
-            );
-          })}
           {/* ports */}
           {[...devicePortsVisible].map((nid) => {
             const n = page.nodes[nid] as DeviceNode;
@@ -850,6 +818,37 @@ export function Canvas() {
             );
           })}
 
+          {selLinks.map((l) => {
+            const g = linkGeometry(l, page, defs, doc.vlans);
+            if (!g) return null;
+            return (
+              <g key={l.id} style={readOnly ? { pointerEvents: 'none' } : undefined}>
+                <path d={g.d} stroke={theme.selection} strokeWidth={l.width + 3 * inv} fill="none" opacity={0.45} pointerEvents="none" strokeDasharray={dashArray(l)} />
+                {!readOnly && <circle data-link-end={`${l.id}|from`} cx={g.start.x} cy={g.start.y} r={5 * inv} fill="#fff" stroke={theme.selection} strokeWidth={1.5 * inv} style={{ cursor: 'move' }} />}
+                {!readOnly && <circle data-link-end={`${l.id}|to`} cx={g.end.x} cy={g.end.y} r={5 * inv} fill="#fff" stroke={theme.selection} strokeWidth={1.5 * inv} style={{ cursor: 'move' }} />}
+                {!readOnly && l.routing === 'orthogonal' && (
+                  <rect data-bend={l.id} x={g.mid.x - 5 * inv} y={g.mid.y - 5 * inv} width={10 * inv} height={10 * inv} rx={2 * inv}
+                    fill={theme.selection} stroke="#fff" strokeWidth={1.2 * inv} style={{ cursor: Math.abs(g.startDir.x) > 0.5 ? 'ew-resize' : 'ns-resize' }} />
+                )}
+                {!readOnly && l.routing === 'straight' && (() => {
+                  const pts = g.pts;
+                  const wps = l.waypoints ?? [];
+                  return (
+                    <g>
+                      {pts.slice(0, -1).map((p, i) => {
+                        const q = pts[i + 1];
+                        const mx = (p.x + q.x) / 2, my = (p.y + q.y) / 2;
+                        return <circle key={'a' + i} data-wp-add={`${l.id}|${i}`} cx={mx} cy={my} r={4 * inv} fill={theme.bg} stroke={theme.selection} strokeWidth={1.2 * inv} strokeDasharray={`${2 * inv} ${1.5 * inv}`} style={{ cursor: 'copy' }}><title>Drag to add a bend point</title></circle>;
+                      })}
+                      {wps.map((p, i) => (
+                        <rect key={'w' + i} data-wp={`${l.id}|${i}`} x={p.x - 4.5 * inv} y={p.y - 4.5 * inv} width={9 * inv} height={9 * inv} rx={2 * inv} fill={theme.selection} stroke="#fff" strokeWidth={1.2 * inv} style={{ cursor: 'move' }}><title>Drag to move · Alt+click to remove</title></rect>
+                      ))}
+                    </g>
+                  );
+                })()}
+              </g>
+            );
+          })}
           {linkPreview}
           {resizable && single && (() => {
             const r = rectOf(single);
@@ -884,7 +883,6 @@ export function Canvas() {
 
       {editing && <InlineEditor editing={editing} vp={vp} onDone={() => setEditing(null)} />}
       {menu && <ContextMenu x={menu.x} y={menu.y} items={menu.items} onClose={() => setMenu(null)} />}
-      <div className="zoom-indicator">{Math.round(z * 100)}%</div>
       {hoverCard && !drag && !editing && page.nodes[hoverCard.id]?.kind === 'device' && (
         <HoverCard n={page.nodes[hoverCard.id] as DeviceNode} x={hoverCard.x} y={hoverCard.y} />
       )}
@@ -917,8 +915,13 @@ function InlineEditor({ editing, vp, onDone }: { editing: Editing; vp: Viewport;
     fontSize = 10;
   }
   const [val, setVal] = useState(initial);
+  const done = useRef(false);
   if (!n && !l) return null;
+  const finish = () => { done.current = true; onDone(); };
   const commit = () => {
+    if (done.current) return;
+    done.current = true;
+    if (val === initial) { onDone(); return; }
     s.change((_d, pg) => {
       const m = pg.nodes[editing.id];
       if (m?.kind === 'text') {
@@ -943,7 +946,7 @@ function InlineEditor({ editing, vp, onDone }: { editing: Editing; vp: Viewport;
   };
   const keys = (e: React.KeyboardEvent) => {
     e.stopPropagation();
-    if (e.key === 'Escape') onDone();
+    if (e.key === 'Escape') { e.preventDefault(); finish(); }
     if (e.key === 'Enter' && (!multiline || e.ctrlKey || e.metaKey)) { e.preventDefault(); commit(); }
   };
   return multiline ? (

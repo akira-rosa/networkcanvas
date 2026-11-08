@@ -20,6 +20,12 @@ function useShortcuts() {
       if (s.editor || isTyping()) return;
       const mod = modKey(e);
       const k = e.key.toLowerCase();
+      // a modal owns the keyboard: only Escape (close) and undo/redo reach the document
+      if (s.modal) {
+        if (k === 'escape') s.set({ modal: null });
+        else if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? s.redo() : s.undo(); }
+        return;
+      }
       if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? s.redo() : s.undo(); return; }
       if (mod && k === 'y') { e.preventDefault(); s.redo(); return; }
       if (mod && k === 's') { e.preventDefault(); saveToFile(e.shiftKey); return; }

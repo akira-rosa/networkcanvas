@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   AlignHorizontalJustifyStart, AlignHorizontalJustifyCenter, AlignHorizontalJustifyEnd, AlignVerticalJustifyStart,
   AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Plus, Trash2,
@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useStore, usePage, defIdOverride } from '../store/store';
 import type { CalloutNode, DeviceNode, DiagramNode, ImageNode, Link, LinkMedia, Page, TextNode, TitleBlockNode, Vlan, ZoneNode, RectNode, LegendNode, VlanTableNode } from '../model/types';
-import { Section, Row, TextInput, NumInput, Select, Toggle, ColorInput, IconButton, TextArea } from '../ui/controls';
+import { Section, Row, TextInput, NumInput, Select, Toggle, ColorInput, IconButton, TextArea, GestureContext } from '../ui/controls';
 import { DefThumb } from '../render/ShapeView';
 import { portUsage } from '../model/geometry';
 import { uid, pickFile, readFileDataUrl } from '../model/util';
@@ -30,7 +30,8 @@ export function Inspector() {
   else if (links.length === 1 && !nodes.length) body = <LinkInspector l={links[0]} page={page} />;
   else if (nodes.length + links.length > 1) body = <MultiInspector nodes={nodes} links={links} />;
   else body = <DocInspector />;
-  return <aside className="right-panel">{body}</aside>;
+  const gesture = useMemo(() => { const st = useStore.getState(); return { begin: st.beginGesture, end: st.endGesture }; }, []);
+  return <aside className="right-panel"><GestureContext.Provider value={gesture}>{body}</GestureContext.Provider></aside>;
 }
 
 function useNodeUpdate<T extends DiagramNode>(id: string): Upd<T> {
@@ -161,7 +162,7 @@ function TitleBlockInspector({ n }: { n: TitleBlockNode }) {
   );
 }
 
-function VlanSelect({ value, onChange, vlans, allowNone = true }: { value?: string; onChange: (v: string | undefined) => void; vlans: Vlan[]; allowNone?: boolean }) {
+function VlanSelect({ value, onChange, vlans, allowNone = true, allowStatus = true }: { value?: string; onChange: (v: string | undefined) => void; vlans: Vlan[]; allowNone?: boolean; allowStatus?: boolean }) {
   const v = vlans.find((x) => x.id === value);
   return (
     <div className="vlan-select">
@@ -169,7 +170,7 @@ function VlanSelect({ value, onChange, vlans, allowNone = true }: { value?: stri
       <select className="input select" value={value ?? ''} onChange={(e) => onChange(e.target.value || undefined)} onKeyDown={(e) => e.stopPropagation()}>
         {allowNone && <option value="">No VLAN</option>}
         {vlans.map((x) => <option key={x.id} value={x.id}>VLAN {x.vlanId} · {x.name}</option>)}
-        <option value="error">Status: alert (red)</option>
+        {allowStatus && <option value="error">Status: alert (red)</option>}
       </select>
     </div>
   );
@@ -293,7 +294,7 @@ function ZoneInspector({ n }: { n: ZoneNode }) {
       <div className="insp-head"><div className="grow"><div className="insp-title">Zone</div><div className="insp-sub">Drag to move everything inside · Alt-drag moves the zone alone</div></div></div>
       <Section title="Zone">
         <Row label="VLAN">
-          <VlanSelect vlans={vlans} value={n.vlan} onChange={(val) => upd((m) => { m.vlan = val === 'error' ? undefined : val; if (val) m.tag = undefined; })} />
+          <VlanSelect vlans={vlans} allowStatus={false} value={n.vlan} onChange={(val) => upd((m) => { m.vlan = val; if (val) m.tag = undefined; })} />
         </Row>
         <Row label="Title"><TextInput value={n.title} placeholder={v ? `VLAN ${v.vlanId}` : 'Zone title'} onChange={(val) => upd((m) => { m.title = val; })} /></Row>
         <Row label="Tag"><TextInput value={n.tag ?? ''} placeholder={v?.subnet ?? 'e.g. 10.0.0.0/24'} onChange={(val) => upd((m) => { m.tag = val || undefined; })} /></Row>
