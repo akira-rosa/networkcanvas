@@ -107,7 +107,7 @@ export function createSampleDoc(): DiagramDoc {
   const P = vlans.prod;
   const cell = (title: string, sx: number, devs: [string, string, string][], hmiFirst = true) => {
     const sw = dev('switch', title, sx, 1035, [], { labelPos: 'top' });
-    const nodes = devs.map(([defId, name, ip], i) => dev(defId, name, 0, 0, [[P, ip]]));
+    const nodes = devs.map(([defId, name, ip]) => dev(defId, name, 0, 0, [[P, ip]]));
     return { sw, nodes, hmiFirst };
   };
 

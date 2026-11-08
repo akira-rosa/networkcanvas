@@ -20,7 +20,6 @@ const WHITE_S = '#cdd4db';
 const EDGE = '#a5afb9';
 const GREEN = '#3ddc6a';
 const AMBER = '#f2b33d';
-const RED = '#e5534b';
 const LED_OFF = '#cfd8e0';
 
 /* ---------- small parts ---------- */

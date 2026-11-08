@@ -1,6 +1,6 @@
 import type { DeviceDef, Shape } from '../model/types';
-import { A, AL, ALL, AD, ADD, P, circ, def, ell, isoBox, isoCyl, line, poly } from './draw';
-import { type Pt, type Faces, W, NAVY, faces, frect, fpoly, fline, sil, at, arrowU, arrowUV } from './iso';
+import { AL, ALL, AD, ADD, P, circ, def, ell, isoBox, isoCyl, line, poly } from './draw';
+import { type Pt, type Faces, W, NAVY, faces, frect, fpoly, fline, sil, at, arrowUV } from './iso';
 
 // Second batch of isometric IT devices — see docs/ICON_SPEC_MORE.md.
 // Same language as iso.ts: blue iso bodies (lighter top, darker right face),
