@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import {
   MousePointer2, Hand, Spline, SquareDashed, Type, Square, Undo2, Redo2, Sun, Moon, SunMoon, Download, ZoomIn, ZoomOut, Maximize,
-  Menu, Grid3x3, Magnet, CircleDot, Keyboard, FolderOpen, Save,
+  Menu, Grid3x3, Magnet, CircleDot, Keyboard, FolderOpen, Save, House,
 } from 'lucide-react';
 import { useStore } from '../store/store';
 import { IconButton, TextInput } from '../ui/controls';
 import { ContextMenu, type MenuItem } from '../ui/ContextMenu';
 import { canvasApi } from '../canvas/api';
-import { newDocument, openFromFile, saveToFile, loadSample, importLibrary } from '../store/persistence';
+import { newDocument, openFromFile, saveToFile, loadSample, importLibrary, goHome } from '../store/persistence';
 import { exportCableScheduleCsv, exportInventoryCsv, exportPdf, exportPng, exportSvg } from '../export/exporters';
 import type { Tool } from '../model/types';
 import { createCallout, createImage, createLegend, createTitleBlock, createVlanTable } from '../model/factory';
@@ -83,10 +83,10 @@ export function TopBar() {
   const exportOpts = { theme: s.theme, background: true, selectionOnly: false, scale: 2, padding: 40 };
 
   const fileMenu: MenuItem[] = [
+    { label: 'All diagrams (home)', action: () => goHome() },
     { label: 'New diagram', shortcut: 'Ctrl+Alt+N', action: () => newDocument() },
     { label: 'Open file…', shortcut: 'Ctrl+O', action: () => openFromFile() },
     { label: 'Find…', shortcut: 'Ctrl+F', action: () => s.set({ modal: 'find' }) },
-    { label: 'My diagrams…', action: () => s.set({ modal: 'documents' }) },
     { sep: true },
     { label: 'Save to file', shortcut: 'Ctrl+S', action: () => saveToFile() },
     { label: 'Save as…', shortcut: 'Ctrl+Shift+S', action: () => saveToFile(true) },
@@ -99,7 +99,7 @@ export function TopBar() {
     { label: 'Export cable schedule (CSV)', action: exportCableScheduleCsv },
     { sep: true },
     { label: 'Import device library…', action: importLibrary },
-    { label: 'Load Smart4.0 sample', action: () => loadSample() },
+    { label: 'Open the Smart4.0 example', action: () => loadSample() },
     { sep: true },
     { label: 'Keyboard shortcuts', shortcut: '?', action: () => s.set({ modal: 'shortcuts' }) },
     { label: `Network Canvas v${__APP_VERSION__} — on GitHub`, action: () => window.open(__APP_REPO__, '_blank', 'noopener') },
@@ -127,6 +127,7 @@ export function TopBar() {
   return (
     <header className="topbar">
       <div className="topbar-left">
+        <IconButton title="All diagrams" onClick={() => goHome()}><House size={16} /></IconButton>
         <button className="menu-btn" onClick={(e) => openMenu(e, fileMenu)}><Menu size={15} /> File</button>
         <button className="menu-btn" onClick={(e) => openMenu(e, insertMenu)}>Insert</button>
         <div className="doc-name">

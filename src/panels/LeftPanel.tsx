@@ -98,7 +98,10 @@ function Library() {
   const libStyle = useStore((s) => s.libStyle);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [menu, setMenu] = useState<{ x: number; y: number; items: MenuItem[] } | null>(null);
-  const clickTimer = useRef<number | undefined>(undefined);
+  // a single click adds after a short delay so a double-click can open the editor instead;
+  // clicking a different card meanwhile adds the pending one right away
+  const pendingAdd = useRef<{ def: DeviceDef; timer: number } | null>(null);
+  const flushPending = () => { const p = pendingAdd.current; if (p) { window.clearTimeout(p.timer); pendingAdd.current = null; addToCanvas(p.def); } };
 
   const groups = useMemo(() => {
     const list = Object.values(defs)
@@ -119,14 +122,17 @@ function Library() {
     const c = canvasApi.center();
     const st = useStore.getState();
     const pg0 = st.doc.pages.find((p) => p.id === st.pageId)!;
-    // step down-right while the spot is taken, so repeated clicks do not pile devices on top of each other
-    let cx = c.x, cy = c.y;
-    for (let i = 0; i < 12; i++) {
-      const taken = Object.values(pg0.nodes).some((n) => n.kind === 'device' && Math.abs(n.x + n.w / 2 - cx) < 20 && Math.abs(n.y + n.h / 2 - cy) < 20);
-      if (!taken) break;
-      cx += 32; cy += 32;
+    // next free slot to the right of the view centre (wrapping into rows), so repeated clicks line devices up
+    const n = createDevice(d, c.x, c.y, placementDefId(defs, d, docStyle));
+    const others = Object.values(pg0.nodes).filter((m) => m.kind === 'device');
+    const hits = (x: number, y: number) => others.some((m) => x < m.x + m.w + 16 && x + n.w + 16 > m.x && y < m.y + m.h + 28 && y + n.h + 28 > m.y);
+    const x0 = n.x, y0 = n.y;
+    slots: for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 6; col++) {
+        const x = Math.round(x0 + col * (n.w + 40)), y = Math.round(y0 + row * (n.h + 56));
+        if (!hits(x, y)) { n.x = x; n.y = y; break slots; }
+      }
     }
-    const n = createDevice(d, cx, cy, placementDefId(defs, d, docStyle));
     s.change((_doc, pg) => { pg.nodes[n.id] = n; pg.order.push(n.id); });
     s.select([n.id]);
   };
@@ -185,8 +191,12 @@ function Library() {
                     draggable
                     title={`${d.name}${d.description ? ' — ' + d.description : ''}\n${d.ports.length} ports · drag onto canvas · double-click to edit`}
                     onDragStart={(e) => { e.dataTransfer.setData('application/x-networkcanvas-def', d.id); e.dataTransfer.effectAllowed = 'copy'; }}
-                    onClick={() => { window.clearTimeout(clickTimer.current); clickTimer.current = window.setTimeout(() => addToCanvas(d), 260); }}
-                    onDoubleClick={() => { window.clearTimeout(clickTimer.current); s.openEditor(d); }}
+                    onClick={() => {
+                      if (pendingAdd.current?.def.id === d.id) { window.clearTimeout(pendingAdd.current.timer); pendingAdd.current = null; return; }
+                      flushPending();
+                      pendingAdd.current = { def: d, timer: window.setTimeout(() => { pendingAdd.current = null; addToCanvas(d); }, 260) };
+                    }}
+                    onDoubleClick={() => { if (pendingAdd.current?.def.id === d.id) { window.clearTimeout(pendingAdd.current.timer); pendingAdd.current = null; } s.openEditor(d); }}
                     onContextMenu={(e) => itemMenu(e, d)}
                   >
                     <div className="lib-thumb"><DefThumb def={d} size={40} /></div>

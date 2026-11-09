@@ -14,7 +14,7 @@ export const systemTheme = (): ThemeName =>
   typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 
 export interface Toast { id: string; text: string; kind: 'info' | 'error' | 'success' }
-export type Modal = null | 'documents' | 'vlans' | 'shortcuts' | 'library' | 'find' | 'export' | 'table' | 'import';
+export type Modal = null | 'vlans' | 'shortcuts' | 'library' | 'find' | 'export' | 'table' | 'import';
 
 export interface EditorSession { def: DeviceDef; isNew: boolean; returnTo?: string }
 
@@ -49,6 +49,8 @@ interface State {
   leftTab: 'library' | 'layers';
   /** hide side panels (Ctrl+\) */
   hideUi: boolean;
+  /** the start screen (diagram manager) is showing instead of the editor */
+  home: boolean;
   /** viewer mode: no editing, clicks only select */
   readOnly: boolean;
   libStyle: 'iso' | 'detailed' | 'all';
@@ -186,6 +188,7 @@ export const useStore = create<State>((set, get) => ({
   viewports: {},
   leftTab: 'library',
   hideUi: false,
+  home: true,
   readOnly: false,
   libStyle: 'iso',
   modal: null,
@@ -241,6 +244,9 @@ export const useStore = create<State>((set, get) => ({
     set({
       doc, pageId: doc.pages[0].id, selection: [], past: [], future: [], gestureBase: null,
       libDefs, defs: styledDefMap(libDefs, doc.iconStyle ?? 'iso'), dirty: false, fitRequest: get().fitRequest + 1,
+      home: false, modal: null, editor: null,
+      // the library shows the document's icon style (unless the user asked to see all)
+      libStyle: get().libStyle === 'all' ? 'all' : doc.iconStyle ?? 'iso',
     });
   },
   setIconStyle: (style) => {
@@ -255,6 +261,7 @@ export const useStore = create<State>((set, get) => ({
         refitDevice(n, before[n.defId], after[n.defId]);
       }
     });
+    if (get().libStyle !== 'all') set({ libStyle: style });
   },
   setDeviceStyle: (ids, style) => {
     const { defs } = get();

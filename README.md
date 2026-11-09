@@ -17,7 +17,8 @@ Everything runs in the browser from one HTML file: no install, no account, no in
 
 - **Download** `NetworkCanvas.html` from the [latest release](../../releases/latest) and double-click it. Chrome, Edge or Firefox. Works fully offline.
 - Or **use it online**: <https://akira-rosa.github.io/networkcanvas/> (the same file, served from GitHub Pages).
-- Diagrams autosave in your browser; use **File → Save to file** (`Ctrl+S`) for `.networkcanvas.json` files you can version, share or back up.
+- It opens on a **start screen** listing the diagrams saved in your browser (with live previews): create a new topology, open the bundled Smart4.0 example, open or drop a file, rename, duplicate, download or delete.
+- Diagrams autosave in your browser; use **File → Save to file** (`Ctrl+S`) for `.networkcanvas.json` files you can version, share or back up. The house button in the editor goes back to the start screen.
 
 ## What it does
 
@@ -44,6 +45,10 @@ Everything runs in the browser from one HTML file: no install, no account, no in
 **Output**
 - PNG (1–4×), SVG (fonts embedded), **PDF/print** (one sheet per page), **interactive HTML** (a self-contained viewer with pan/zoom, pages, search, hover cards and device details — and an *Edit* button that turns it back into the full editor), device inventory CSV and **cable schedule** CSV.
 - Light and dark themes (follows your OS by default); exports can use either.
+
+<p align="center">
+  <img src="docs/screenshots/home.png" width="70%" alt="Start screen with saved diagrams">
+</p>
 
 <p align="center">
   <img src="docs/screenshots/device-editor.png" width="49%" alt="Device editor">

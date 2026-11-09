@@ -15,6 +15,7 @@ async function shot(name, scheme, fn) {
   const page = await ctx.newPage();
   await page.goto(url);
   await page.waitForTimeout(1200);
+  if (name !== 'home') { await page.click('.start-example'); await page.waitForTimeout(800); }
   await fn(page);
   await page.waitForTimeout(300);
   await page.screenshot({ path: `docs/screenshots/${name}.png` });
@@ -24,6 +25,15 @@ async function shot(name, scheme, fn) {
 
 const zoomAt = async (page, x, y, steps) => { await page.mouse.move(x, y); for (let i = 0; i < steps; i++) { await page.keyboard.down('Control'); await page.mouse.wheel(0, -100); await page.keyboard.up('Control'); await page.waitForTimeout(30); } };
 
+await shot('home', 'dark', async (page) => {
+  // two diagrams so the list has something to show
+  await page.click('.start-example'); await page.waitForTimeout(600);
+  await page.click('button[title="All diagrams"]'); await page.waitForTimeout(300);
+  await page.keyboard.press('n'); await page.fill('#new-topo-name', 'Plant B — packaging line');
+  await page.click('.style-choice:has-text("Detailed")'); await page.click('button:has-text("Create topology")'); await page.waitForTimeout(400);
+  for (const n of ['Industrial Router', 'Switch', 'Firewall', 'Server']) { await page.click(`.lib-item:has-text("${n}") >> nth=0`); await page.waitForTimeout(600); }
+  await page.click('button[title="All diagrams"]'); await page.waitForTimeout(900);
+});
 await shot('editor-dark', 'dark', async (page) => { await page.keyboard.press('Shift+Digit1'); });
 await shot('editor-light', 'light', async (page) => {
   await page.click('.right-panel .seg button:has-text("Detailed")');
