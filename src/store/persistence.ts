@@ -1,7 +1,8 @@
 import { get, set, del } from 'idb-keyval';
 import { useStore, withEmbeddedDefs, buildDefMap, systemTheme } from './store';
-import type { DeviceDef, DiagramDoc } from '../model/types';
-import { createSampleDoc, SAMPLE_VERSION } from '../library/sample';
+import type { DeviceDef, DiagramDoc, IconStyle } from '../model/types';
+import { newDoc } from '../model/factory';
+import { createSampleDoc } from '../library/sample';
 import { downloadText, pickFile, readFileText, stableStringify, uid } from '../model/util';
 
 // Everything is stored locally in the browser (IndexedDB) — no server.
@@ -26,21 +27,9 @@ export async function initPersistence() {
     const pref = useStore.getState().themePref;
     useStore.setState({ theme: pref === 'system' ? systemTheme() : pref });
     if (Array.isArray(userDefs)) useStore.getState().setUserDefs(userDefs as DeviceDef[]);
-    const idx = (index as DocMeta[] | undefined) ?? [];
-    const lastId = settings?.lastDocId as string | undefined;
-    let doc: DiagramDoc | undefined;
-    if (lastId) doc = await get(K.doc(lastId));
-    if (!doc && idx.length) doc = await get(K.doc(idx[0].id));
-    const isOldSample = doc && doc.name.startsWith('Smart4.0') && (doc.sampleVersion ?? 1) < SAMPLE_VERSION && !idx.some((m) => m.id !== doc!.id && m.name.startsWith('Smart4.0'));
-    if (!doc || isOldSample) {
-      // first run, or the bundled sample was made with an older icon library: load the current one
-      doc = createSampleDoc();
-      await saveDocNow(doc);
-    }
-    useStore.getState().loadDoc(doc);
+    void index; // the start screen lists the saved diagrams; nothing is opened automatically
   } catch (e) {
     console.warn('Storage unavailable, running in memory only', e);
-    useStore.getState().loadDoc(createSampleDoc());
   }
 
   // autosave
@@ -83,11 +72,23 @@ export async function listDocs(): Promise<DocMeta[]> {
   return (((await get(K.index)) as DocMeta[]) ?? []).sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
+/** a stored diagram without opening it (start-screen thumbnails, downloads) */
+export async function readDoc(id: string): Promise<DiagramDoc | undefined> {
+  return (await get(K.doc(id))) as DiagramDoc | undefined;
+}
+
 export async function openDoc(id: string) {
   const s = useStore.getState();
   if (s.dirty) await saveDocNow(s.doc);
-  const doc = (await get(K.doc(id))) as DiagramDoc | undefined;
+  const doc = await readDoc(id);
   if (doc) { importEmbeddedDefs(doc); s.loadDoc(doc); fileHandle = null; }
+}
+
+/** back to the start screen (the current diagram is saved first) */
+export async function goHome() {
+  const s = useStore.getState();
+  if (s.dirty) { clearTimeout(saveTimer); await saveDocNow(s.doc); }
+  useStore.setState({ home: true, modal: null, editor: null, selection: [] });
 }
 
 export async function deleteDoc(id: string) {
@@ -95,26 +96,42 @@ export async function deleteDoc(id: string) {
   const idx = await listDocs();
   await set(K.index, idx.filter((m) => m.id !== id));
   if (useStore.getState().doc.id === id) {
-    const rest = idx.filter((m) => m.id !== id);
-    if (rest.length) await openDoc(rest[0].id); else newDocument();
+    // forget the deleted diagram in memory too, so autosave cannot bring it back
+    const blank = newDoc();
+    useStore.setState({ doc: blank, pageId: blank.pages[0].id, past: [], future: [], selection: [], dirty: false });
   }
 }
 
 export async function duplicateDoc(id: string) {
-  const doc = (await get(K.doc(id))) as DiagramDoc | undefined;
+  const doc = await readDoc(id);
   if (!doc) return;
-  const copy = { ...doc, id: uid('doc'), name: doc.name + ' (copy)', updatedAt: Date.now() };
+  const copy = { ...doc, id: uid('doc'), name: doc.name + ' (copy)', createdAt: Date.now(), updatedAt: Date.now() };
   await saveDocNow(copy);
 }
 
-export async function newDocument() {
+export async function renameDoc(id: string, name: string) {
+  const s = useStore.getState();
+  if (s.doc.id === id) { s.change((d) => { d.name = name; }); await saveDocNow(useStore.getState().doc); return; }
+  const doc = await readDoc(id);
+  if (doc) await saveDocNow({ ...doc, name, updatedAt: Date.now() });
+}
+
+export async function downloadDoc(id: string) {
+  const doc = await readDoc(id);
+  if (doc) downloadText(safeName(doc.name) + FILE_EXT, stableStringify(doc));
+}
+
+export async function newDocument(opts: { name?: string; iconStyle?: IconStyle } = {}) {
   const s = useStore.getState();
   if (s.dirty) await saveDocNow(s.doc);
-  s.newDocument();
+  const d = newDoc(opts.name?.trim() || 'Untitled topology');
+  if (opts.iconStyle && opts.iconStyle !== 'iso') d.iconStyle = opts.iconStyle;
+  s.loadDoc(d);
   fileHandle = null;
   await saveDocNow(useStore.getState().doc);
 }
 
+/** a fresh copy of the bundled Smart4.0 example */
 export async function loadSample() {
   const s = useStore.getState();
   if (s.dirty) await saveDocNow(s.doc);
@@ -177,6 +194,16 @@ export async function openFromFile() {
     text = await readFileText(f);
     fileHandle = null;
   }
+  await openDocText(text);
+}
+
+/** open a dropped .networkcanvas.json file */
+export async function openDroppedFile(f: File) {
+  fileHandle = null;
+  await openDocText(await readFileText(f));
+}
+
+async function openDocText(text: string) {
   try {
     const doc = JSON.parse(text) as DiagramDoc;
     // files written before the rename (format 'netcanvas') still open

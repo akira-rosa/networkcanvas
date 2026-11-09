@@ -6,6 +6,7 @@ import { Inspector } from './panels/Inspector';
 import { Canvas, isTyping } from './canvas/Canvas';
 import { Modals } from './panels/Modals';
 import { DeviceEditor } from './editor/DeviceEditor';
+import { Home } from './home/Home';
 import { canvasApi } from './canvas/api';
 import { newDocument, openFromFile, saveToFile } from './store/persistence';
 import { modKey } from './model/util';
@@ -17,7 +18,7 @@ function useShortcuts() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const s = useStore.getState();
-      if (s.editor || isTyping()) return;
+      if (s.editor || s.home || isTyping()) return;
       const mod = modKey(e);
       const k = e.key.toLowerCase();
       // a modal owns the keyboard: only Escape (close) and undo/redo reach the document
@@ -84,6 +85,7 @@ export function App() {
   const theme = useStore((s) => s.theme);
   const editor = useStore((s) => s.editor);
   const hideUi = useStore((s) => s.hideUi);
+  const home = useStore((s) => s.home);
   useShortcuts();
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -96,6 +98,7 @@ export function App() {
     return () => mq.removeEventListener('change', on);
   }, []);
   void currentPage;
+  if (home) return <><Home /><Toasts /></>;
   return (
     <div className="app">
       <TopBar />

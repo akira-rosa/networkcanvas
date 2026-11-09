@@ -23,7 +23,9 @@ page.on('dialog', (d) => d.accept());
 
 await page.goto(url);
 await page.waitForTimeout(1200);
-check('sample diagram loads', (await page.$$('[data-id]')).length > 40);
+check('opens on the start screen with nothing saved', !!(await page.$('.home')) && !!(await page.$('.home-empty')) && !(await page.$('.canvas-area')));
+await page.click('.start-example'); await page.waitForTimeout(600);
+check('example diagram opens from the start screen', (await page.$$('[data-id]')).length > 40);
 check('theme follows prefers-color-scheme (dark)', (await page.evaluate(() => document.documentElement.dataset.theme)) === 'dark');
 
 // linking two free ethernet ports
@@ -90,14 +92,19 @@ check('custom device saved to library', await page.$$eval('.lib-item', (els) => 
 // persistence across reload
 await page.fill('.doc-name input', 'E2E persisted'); await page.keyboard.press('Enter'); await page.waitForTimeout(900);
 await page.reload(); await page.waitForTimeout(1200);
+check('start screen lists the saved diagram after reload', await page.$$eval('.doc-card-name', (els) => els.some((e) => e.textContent === 'E2E persisted')));
+await page.click('.doc-card:has-text("E2E persisted") .doc-card-open'); await page.waitForTimeout(600);
 check('document and library persist after reload', (await page.inputValue('.doc-name input')) === 'E2E persisted' && (await page.$$eval('.lib-item', (els) => els.some((e) => e.textContent.includes('E2E Device')))));
+await page.click('button[title="All diagrams"]'); await page.waitForTimeout(400);
+await page.keyboard.press('n'); await page.fill('#new-topo-name', 'E2E new'); await page.click('button:has-text("Create topology")'); await page.waitForTimeout(400);
+check('new topology from the start screen', (await page.inputValue('.doc-name input')) === 'E2E new' && (await page.$$('.canvas-area [data-id]')).length === 0);
 
 // the page must survive a host that injects a script before the app (chat preview panes do this)
 const injected = (await (await import('node:fs/promises')).readFile(file, 'utf8')).replace(/<head[^>]*>/, (m) => m + '<script>window.__x=1</script>');
 const injPath = join(tmp, 'injected.html'); writeFileSync(injPath, injected);
 const ip = await ctx.newPage(); const ierr = []; ip.on('pageerror', (e) => ierr.push(e.message));
 await ip.goto('file://' + injPath); await ip.waitForTimeout(1000);
-check('survives injected scripts', (await ip.$$('[data-id]')).length > 40 && ierr.length === 0, ierr.join(' | '));
+check('survives injected scripts', !!(await ip.$('.home')) && ierr.length === 0, ierr.join(' | '));
 await ip.close();
 
 check('no console errors in the editor', errors.length === 0, errors.join(' | '));

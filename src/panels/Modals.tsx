@@ -1,19 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Plus, Trash2, Copy, FolderOpen } from 'lucide-react';
+import { useMemo } from 'react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useStore } from '../store/store';
 import { FindPalette } from './FindPalette';
 import { ExportDialog } from './ExportDialog';
 import { DeviceTable, ImportDialog } from './DeviceTable';
 import { Modal, TextInput, NumInput } from '../ui/controls';
 import { newVlan } from '../model/factory';
-import { deleteDoc, duplicateDoc, listDocs, newDocument, openDoc, openFromFile, type DocMeta } from '../store/persistence';
 
 export function Modals() {
   const modal = useStore((s) => s.modal);
   const set = useStore((s) => s.set);
   const close = () => set({ modal: null });
   if (modal === 'vlans') return <VlanManager onClose={close} />;
-  if (modal === 'documents') return <Documents onClose={close} />;
   if (modal === 'shortcuts') return <Shortcuts onClose={close} />;
   if (modal === 'find') return <FindPalette onClose={close} />;
   if (modal === 'export') return <ExportDialog onClose={close} />;
@@ -63,36 +61,6 @@ function VlanManager({ onClose }: { onClose: () => void }) {
           ))}
         </tbody>
       </table>
-    </Modal>
-  );
-}
-
-function Documents({ onClose }: { onClose: () => void }) {
-  const [docs, setDocs] = useState<DocMeta[]>([]);
-  const current = useStore((s) => s.doc.id);
-  const refresh = () => listDocs().then(setDocs);
-  useEffect(() => { refresh(); }, []);
-  return (
-    <Modal title="My diagrams" onClose={onClose} width={640}
-      footer={<>
-        <span className="hint">Stored locally in this browser. Use File › Save to file for backups and sharing.</span>
-        <button className="btn ghost" onClick={async () => { await openFromFile(); onClose(); }}><FolderOpen size={14} /> Open file…</button>
-        <button className="btn primary" onClick={async () => { await newDocument(); onClose(); }}><Plus size={14} /> New diagram</button>
-      </>}
-    >
-      <div className="doc-list">
-        {docs.map((d) => (
-          <div key={d.id} className={'doc-row' + (d.id === current ? ' active' : '')} onClick={async () => { await openDoc(d.id); onClose(); }}>
-            <div className="grow">
-              <div className="doc-title">{d.name}</div>
-              <div className="dim small">{new Date(d.updatedAt).toLocaleString()} · {d.pages} page{d.pages !== 1 ? 's' : ''} · {d.devices} devices</div>
-            </div>
-            <button className="icon-btn xs" title="Duplicate" onClick={async (e) => { e.stopPropagation(); await duplicateDoc(d.id); refresh(); }}><Copy size={13} /></button>
-            <button className="icon-btn xs" title="Delete" onClick={async (e) => { e.stopPropagation(); if (confirm(`Delete “${d.name}”? This cannot be undone.`)) { await deleteDoc(d.id); refresh(); } }}><Trash2 size={13} /></button>
-          </div>
-        ))}
-        {!docs.length && <div className="empty">No saved diagrams yet.</div>}
-      </div>
     </Modal>
   );
 }
