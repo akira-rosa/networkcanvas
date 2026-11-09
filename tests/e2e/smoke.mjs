@@ -1,14 +1,14 @@
-// End-to-end smoke test for the built single-file app (dist/NetCanvas.html).
+// End-to-end smoke test for the built single-file app (dist/NetworkCanvas.html).
 // Run `npm run build` first. Needs Playwright with Chromium: `npx playwright install chromium`.
 import { chromium } from 'playwright';
 import { existsSync, statSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-const file = resolve('dist/NetCanvas.html');
-if (!existsSync(file)) { console.error('dist/NetCanvas.html not found — run `npm run build` first'); process.exit(1); }
+const file = resolve('dist/NetworkCanvas.html');
+if (!existsSync(file)) { console.error('dist/NetworkCanvas.html not found — run `npm run build` first'); process.exit(1); }
 const url = 'file://' + file;
-const tmp = mkdtempSync(join(tmpdir(), 'netcanvas-e2e-'));
+const tmp = mkdtempSync(join(tmpdir(), 'networkcanvas-e2e-'));
 
 let failures = 0;
 const check = (name, ok, detail = '') => { console.log(`${ok ? '✓' : '✗'} ${name}${detail ? ' — ' + detail : ''}`); if (!ok) failures++; };

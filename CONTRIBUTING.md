@@ -1,6 +1,6 @@
-# Contributing to NetCanvas
+# Contributing to Network Canvas
 
-Thanks for helping. Issues and pull requests are welcome — bug reports with a `.netcanvas.json`
+Thanks for helping. Issues and pull requests are welcome — bug reports with a `.networkcanvas.json`
 that reproduces the problem are the most useful kind.
 
 ## Setup
@@ -9,7 +9,7 @@ that reproduces the problem are the most useful kind.
 npm install
 npm run dev        # Vite dev server with hot reload
 npm test           # vitest unit tests
-npm run build      # dist/NetCanvas.html (single offline file)
+npm run build      # dist/NetworkCanvas.html (single offline file)
 npm run e2e        # Playwright smoke test against the built file
 ```
 

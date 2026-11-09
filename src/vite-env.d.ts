@@ -1,0 +1,5 @@
+/// <reference types="vite/client" />
+
+// injected by vite.config.ts from package.json
+declare const __APP_VERSION__: string;
+declare const __APP_REPO__: string;

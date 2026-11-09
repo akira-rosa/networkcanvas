@@ -1,4 +1,4 @@
-# NetCanvas — architecture & design notes
+# Network Canvas — architecture & design notes
 
 ## Goals
 
@@ -11,10 +11,10 @@ an icon library anyone can extend. Dark and light themes; one self-contained HTM
 | Concern | Choice | Why |
 |---|---|---|
 | UI | React 19 + TypeScript, Vite | Fast, typed, easy to contribute to |
-| Offline | `vite-plugin-singlefile` + `scripts/postbuild.mjs` → `dist/NetCanvas.html` | Double-click to run; also survives hosts that inject scripts into the page |
+| Offline | `vite-plugin-singlefile` + `scripts/postbuild.mjs` → `dist/NetworkCanvas.html` | Double-click to run; also survives hosts that inject scripts into the page |
 | Rendering | Hand-written SVG (`src/render`) shared by canvas and exporters | Full control over ports, routing, zones; what you see is what you export |
 | State | zustand + immer; snapshot undo/redo (`past`/`future` arrays of documents) | Simple, structural sharing keeps history cheap |
-| Storage | IndexedDB (`idb-keyval`) autosave; `.netcanvas.json` files via File System Access API with download fallback | Local-first, portable, git-friendly (sorted keys) |
+| Storage | IndexedDB (`idb-keyval`) autosave; `.networkcanvas.json` files via File System Access API with download fallback | Local-first, portable, git-friendly (sorted keys) |
 | Devices | Pure data: shapes + ports + property fields | Built-ins and user devices are the same thing; libraries are JSON |
 
 ## Data model (`src/model/types.ts`)

@@ -80,7 +80,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
             <div className="hint" style={{ lineHeight: 1.6 }}>
               Produces one <b>.html</b> file (~1 MB) with the diagram embedded. Anyone can open it in a browser with no install or internet:
               pan and zoom, switch pages, search devices, hover for addresses and properties, click a device for its full details and ports,
-              print, or download the diagram as a NetCanvas file. An “Edit” button turns it into the full editor.
+              print, or download the diagram as a Network Canvas file. An “Edit” button turns it into the full editor.
             </div>
           )}
           {(format === 'csv-devices' || format === 'csv-cables') && (

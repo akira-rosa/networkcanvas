@@ -180,7 +180,7 @@ export function createSampleDoc(): DiagramDoc {
   add(note);
 
   return {
-    format: 'netcanvas', version: 1, id: uid('doc'), name: 'Smart4.0 — Network topology', sampleVersion: SAMPLE_VERSION,
+    format: 'networkcanvas', version: 1, id: uid('doc'), name: 'Smart4.0 — Network topology', sampleVersion: SAMPLE_VERSION,
     pages: [page],
     meta: { author: 'Network team', company: 'Smart4.0', version: '2.0', classification: 'Internal' },
     lineJumps: true,

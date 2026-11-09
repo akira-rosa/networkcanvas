@@ -11,12 +11,12 @@ import type { DiagramDoc } from './model/types';
 import { uid } from './model/util';
 
 declare global {
-  interface Window { __NETCANVAS_DOC__?: DiagramDoc; __NETCANVAS_VIEW__?: boolean }
+  interface Window { __NETWORKCANVAS_DOC__?: DiagramDoc; __NETWORKCANVAS_VIEW__?: boolean }
 }
 
 const root = createRoot(document.getElementById('root')!);
 const sheet = new URLSearchParams(location.search).get('sheet');
-const embedded = window.__NETCANVAS_DOC__;
+const embedded = window.__NETWORKCANVAS_DOC__;
 
 function bootEditor() {
   initPersistence().finally(() => {
@@ -30,7 +30,7 @@ function bootEditor() {
 
 if (sheet) {
   root.render(<Sheet filter={sheet} />);
-} else if (embedded && window.__NETCANVAS_VIEW__) {
+} else if (embedded && window.__NETWORKCANVAS_VIEW__) {
   // interactive export: read-only viewer; "Edit" opens the editor with a copy of the embedded diagram
   const onEdit = () => {
     useStore.setState({ readOnly: false, hideUi: false });
