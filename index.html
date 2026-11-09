@@ -8,7 +8,18 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231a8fd8'/%3E%3Cpath d='M9 22h14M16 9v13M9 22a2.5 2.5 0 1 0 0 .01M23 22a2.5 2.5 0 1 0 0 .01M16 9a2.5 2.5 0 1 0 0 .01' stroke='white' stroke-width='2.2' fill='white'/%3E%3C/svg%3E" />
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Replaced by the app as soon as it starts. Seen only when this source file is opened directly. -->
+    <div id="root">
+      <div style="font: 15px/1.5 system-ui, sans-serif; max-width: 34em; margin: 12vh auto; padding: 0 16px; color: #8a8f98; opacity: 0; animation: nc-hint 0s 1.5s forwards">
+        <h1 style="font-size: 20px; color: inherit">Network Canvas did not start</h1>
+        <p>This looks like the <b>source</b> <code>index.html</code>, which only runs through the dev server
+        (<code>npm run dev</code>). To use the app, open <code>dist/NetworkCanvas.html</code> after
+        <code>npm run build</code>, or download <code>NetworkCanvas.html</code> from the
+        <a href="https://github.com/akira-rosa/networkcanvas/releases/latest">latest release</a>.</p>
+        <p>On GitHub Pages, set <i>Settings → Pages → Source</i> to <b>GitHub Actions</b>.</p>
+      </div>
+      <style>@keyframes nc-hint { to { opacity: 1 } }</style>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

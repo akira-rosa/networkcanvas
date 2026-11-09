@@ -5,6 +5,7 @@
 - Renamed the project to **Network Canvas**: the build is `NetworkCanvas.html`, diagrams save as `.networkcanvas.json` (files saved under the old `.netcanvas.json` name still open), library packs use the `networkcanvas-library` format (old packs still import).
 - File menu: keyboard shortcuts entry and an about/version entry linking to GitHub.
 - Repository: pull request and issue templates, code of conduct.
+- Opening the source `index.html` directly (or serving the repo root on Pages) now explains what to open instead of showing a blank page.
 
 ## 0.3.0 — 2026-11-08
 
