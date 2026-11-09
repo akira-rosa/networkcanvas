@@ -5,5 +5,5 @@ dist/
 Thumbs.db
 .vite/
 coverage/
-/NetCanvas.html
+/NetworkCanvas.html
 /playwright-report/

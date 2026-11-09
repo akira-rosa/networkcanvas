@@ -4,7 +4,7 @@ import { chromium } from 'playwright';
 import { existsSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const file = resolve('dist/NetCanvas.html');
+const file = resolve('dist/NetworkCanvas.html');
 if (!existsSync(file)) { console.error('run `npm run build` first'); process.exit(1); }
 mkdirSync('docs/screenshots', { recursive: true });
 const url = 'file://' + file;

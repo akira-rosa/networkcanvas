@@ -342,7 +342,7 @@ export interface Layer {
 }
 
 export interface DiagramDoc {
-  format: 'netcanvas';
+  format: 'networkcanvas';
   version: 1;
   id: ID;
   name: string;

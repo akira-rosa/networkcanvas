@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Renamed the project to **Network Canvas**: the build is `NetworkCanvas.html`, diagrams save as `.networkcanvas.json` (files saved under the old `.netcanvas.json` name still open), library packs use the `networkcanvas-library` format (old packs still import).
+- File menu: keyboard shortcuts entry and an about/version entry linking to GitHub.
+- Repository: pull request and issue templates, code of conduct.
+
 ## 0.3.0 — 2026-11-08
 
 First public release. Includes the fixes from a 383-check black-box QA pass:

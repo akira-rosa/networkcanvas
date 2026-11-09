@@ -6,7 +6,7 @@ import { uid } from './util';
 export const newPage = (name = 'Page 1'): Page => ({ id: uid('pg'), name, nodes: {}, order: [], links: {} });
 
 export const newDoc = (name = 'Untitled diagram'): DiagramDoc => ({
-  format: 'netcanvas',
+  format: 'networkcanvas',
   version: 1,
   id: uid('doc'),
   name,

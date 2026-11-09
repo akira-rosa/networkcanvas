@@ -74,7 +74,7 @@ export function Viewer({ doc, onEdit }: { doc: DiagramDoc; onEdit: () => void })
           <IconButton title="Zoom to fit" onClick={() => canvasApi.fit()}><Maximize size={16} /></IconButton>
           <span className="divider" />
           <IconButton title="Print / PDF" onClick={() => exportPdf({ theme: 'light', background: true, selectionOnly: false, scale: 2, padding: 40, allPages: true })}><Printer size={16} /></IconButton>
-          <IconButton title="Download as NetCanvas file" onClick={() => downloadText(safeName(s.doc.name) + '.netcanvas.json', JSON.stringify(s.doc, null, 1))}><Download size={16} /></IconButton>
+          <IconButton title="Download as Network Canvas file" onClick={() => downloadText(safeName(s.doc.name) + '.networkcanvas.json', JSON.stringify(s.doc, null, 1))}><Download size={16} /></IconButton>
           <IconButton title={`Theme: ${s.themePref}`} onClick={s.cycleTheme}>{s.themePref === 'system' ? <SunMoon size={16} /> : s.themePref === 'light' ? <Sun size={16} /> : <Moon size={16} />}</IconButton>
           <span className="divider" />
           <button className="btn primary sm" onClick={onEdit} title="Open the full editor with this diagram"><Pencil size={13} /> Edit</button>

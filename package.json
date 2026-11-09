@@ -1,18 +1,18 @@
 {
-  "name": "netcanvas",
+  "name": "networkcanvas",
   "version": "0.3.0",
   "description": "Offline, single-file network & OT diagram editor with port-aware links, VLAN-bound zones, two icon styles and a Figma-like device editor.",
   "license": "MIT",
   "author": "Akira Rosa",
   "private": true,
   "type": "module",
-  "homepage": "https://github.com/akira-rosa/netcanvas#readme",
+  "homepage": "https://github.com/akira-rosa/networkcanvas#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/akira-rosa/netcanvas.git"
+    "url": "https://github.com/akira-rosa/networkcanvas.git"
   },
   "bugs": {
-    "url": "https://github.com/akira-rosa/netcanvas/issues"
+    "url": "https://github.com/akira-rosa/networkcanvas/issues"
   },
   "keywords": [
     "network-diagram",

@@ -184,7 +184,7 @@ function Library() {
                     className="lib-item"
                     draggable
                     title={`${d.name}${d.description ? ' — ' + d.description : ''}\n${d.ports.length} ports · drag onto canvas · double-click to edit`}
-                    onDragStart={(e) => { e.dataTransfer.setData('application/x-netcanvas-def', d.id); e.dataTransfer.effectAllowed = 'copy'; }}
+                    onDragStart={(e) => { e.dataTransfer.setData('application/x-networkcanvas-def', d.id); e.dataTransfer.effectAllowed = 'copy'; }}
                     onClick={() => { window.clearTimeout(clickTimer.current); clickTimer.current = window.setTimeout(() => addToCanvas(d), 260); }}
                     onDoubleClick={() => { window.clearTimeout(clickTimer.current); s.openEditor(d); }}
                     onContextMenu={(e) => itemMenu(e, d)}

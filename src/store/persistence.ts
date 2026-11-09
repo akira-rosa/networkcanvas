@@ -133,8 +133,8 @@ function importEmbeddedDefs(doc: DiagramDoc) {
 
 /* ---------- files on disk ---------- */
 
-const FILE_EXT = '.netcanvas.json';
-const fileTypes = [{ description: 'NetCanvas diagram', accept: { 'application/json': ['.json'] } }];
+const FILE_EXT = '.networkcanvas.json';
+const fileTypes = [{ description: 'Network Canvas diagram', accept: { 'application/json': ['.json'] } }];
 
 export async function saveToFile(saveAs = false) {
   const s = useStore.getState();
@@ -179,7 +179,9 @@ export async function openFromFile() {
   }
   try {
     const doc = JSON.parse(text) as DiagramDoc;
-    if (doc.format !== 'netcanvas') throw new Error('Not a NetCanvas file');
+    // files written before the rename (format 'netcanvas') still open
+    if (doc.format !== 'networkcanvas' && (doc.format as string) !== 'netcanvas') throw new Error('Not a Network Canvas file');
+    doc.format = 'networkcanvas';
     const s = useStore.getState();
     if (s.dirty) await saveDocNow(s.doc);
     importEmbeddedDefs(doc);
@@ -197,8 +199,8 @@ export const safeName = (n: string) =>
 
 /* ---------- library packs ---------- */
 
-export function exportLibrary(defs: DeviceDef[], name = 'netcanvas-library') {
-  downloadText(`${safeName(name)}.netlib.json`, JSON.stringify({ format: 'netcanvas-library', version: 1, defs }, null, 1));
+export function exportLibrary(defs: DeviceDef[], name = 'network-canvas-library') {
+  downloadText(`${safeName(name)}.netlib.json`, JSON.stringify({ format: 'networkcanvas-library', version: 1, defs }, null, 1));
 }
 
 export async function importLibrary() {
@@ -206,7 +208,7 @@ export async function importLibrary() {
   if (!f) return;
   try {
     const data = JSON.parse(await readFileText(f));
-    const defs: DeviceDef[] = data.format === 'netcanvas-library' ? data.defs : data.id && data.shapes ? [data] : [];
+    const defs: DeviceDef[] = data.format === 'networkcanvas-library' || data.format === 'netcanvas-library' ? data.defs : data.id && data.shapes ? [data] : [];
     if (!defs.length) throw new Error('No devices found in file');
     const s = useStore.getState();
     const ids = new Set(defs.map((d) => d.id));

@@ -167,15 +167,15 @@ export function buildViewerHtml(): string {
   const doc = withEmbeddedDefs(s.doc, s.libDefs);
   const root = document.documentElement.cloneNode(true) as HTMLElement;
   root.removeAttribute('data-theme');
-  root.querySelectorAll('script[data-netcanvas-doc]').forEach((e) => e.remove());
+  root.querySelectorAll('script[data-networkcanvas-doc]').forEach((e) => e.remove());
   const mount = root.querySelector('#root');
   if (mount) mount.innerHTML = '';
   const title = root.querySelector('title');
   if (title) title.textContent = doc.name;
   const json = JSON.stringify(doc).replace(/</g, '\\u003c').replace(/[\u2028\u2029]/g, '');
   const script = document.createElement('script');
-  script.setAttribute('data-netcanvas-doc', '');
-  script.textContent = `window.__NETCANVAS_DOC__=${json};window.__NETCANVAS_VIEW__=true;`;
+  script.setAttribute('data-networkcanvas-doc', '');
+  script.textContent = `window.__NETWORKCANVAS_DOC__=${json};window.__NETWORKCANVAS_VIEW__=true;`;
   root.querySelector('head')!.appendChild(script);
   return '<!doctype html>\n' + root.outerHTML;
 }

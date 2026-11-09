@@ -1,4 +1,4 @@
-// Contact sheet for validating icons: open NetCanvas with ?sheet=iso | detailed | all | id1,id2
+// Contact sheet for validating icons: open Network Canvas with ?sheet=iso | detailed | all | id1,id2
 import { ALL_BUILTIN } from '../library';
 import { DeviceGraphic } from '../render/ShapeView';
 import { DeviceLabel } from '../render/DiagramLayer';

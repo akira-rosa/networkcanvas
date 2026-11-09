@@ -656,11 +656,11 @@ export function Canvas() {
 
   /* ---------- drop from library ---------- */
   const onDragOver = (e: React.DragEvent) => {
-    if (e.dataTransfer.types.includes('application/x-netcanvas-def')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }
+    if (e.dataTransfer.types.includes('application/x-networkcanvas-def')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }
   };
   const onDrop = (e: React.DragEvent) => {
     if (store().readOnly) return;
-    const defId = e.dataTransfer.getData('application/x-netcanvas-def');
+    const defId = e.dataTransfer.getData('application/x-networkcanvas-def');
     const lib = store().libDefs;
     const def = lib[defId];
     if (!def) return;

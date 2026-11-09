@@ -1,12 +1,12 @@
-# NetCanvas
+# Network Canvas
 
 **A free, offline, single-file network & OT diagram editor** — built by a network/security engineer who got tired of drawing switches in Figma.
 
-NetCanvas knows what a network is: devices have **ports** with media types and capacities, links snap port-to-port and refuse impossible cables, zones are bound to a **VLAN registry** (subnet, colour, description), every IP gets its VLAN's coloured dot, and a **checks** panel flags duplicate IPs, addresses outside their subnet, over-subscribed ports and unconnected devices. It ships with two complete icon styles — an **isometric** blue/white set and a **detailed** front-view set — that any diagram can switch between, plus a Figma-like **device editor** to draw your own.
+Network Canvas knows what a network is: devices have **ports** with media types and capacities, links snap port-to-port and refuse impossible cables, zones are bound to a **VLAN registry** (subnet, colour, description), every IP gets its VLAN's coloured dot, and a **checks** panel flags duplicate IPs, addresses outside their subnet, over-subscribed ports and unconnected devices. It ships with two complete icon styles — an **isometric** blue/white set and a **detailed** front-view set — that any diagram can switch between, plus a Figma-like **device editor** to draw your own.
 
 Everything runs in the browser from one HTML file: no install, no account, no internet.
 
-![NetCanvas editor, dark theme](docs/screenshots/editor-dark.png)
+![Network Canvas editor, dark theme](docs/screenshots/editor-dark.png)
 
 <p align="center">
   <img src="docs/screenshots/detail-isometric.png" width="49%" alt="Isometric icon style">
@@ -15,9 +15,9 @@ Everything runs in the browser from one HTML file: no install, no account, no in
 
 ## Get it
 
-- **Download** `NetCanvas.html` from the [latest release](../../releases/latest) and double-click it. Chrome, Edge or Firefox. Works fully offline.
-- Or **use it online**: <https://akira-rosa.github.io/netcanvas/> (the same file, served from GitHub Pages).
-- Diagrams autosave in your browser; use **File → Save to file** (`Ctrl+S`) for `.netcanvas.json` files you can version, share or back up.
+- **Download** `NetworkCanvas.html` from the [latest release](../../releases/latest) and double-click it. Chrome, Edge or Firefox. Works fully offline.
+- Or **use it online**: <https://akira-rosa.github.io/networkcanvas/> (the same file, served from GitHub Pages).
+- Diagrams autosave in your browser; use **File → Save to file** (`Ctrl+S`) for `.networkcanvas.json` files you can version, share or back up.
 
 ## What it does
 
@@ -60,7 +60,7 @@ Everything runs in the browser from one HTML file: no install, no account, no in
 npm install
 npm run dev          # http://localhost:5173
 npm test             # unit tests (vitest)
-npm run build        # dist/NetCanvas.html — the single offline file
+npm run build        # dist/NetworkCanvas.html — the single offline file
 npm run e2e          # Playwright smoke test against the built file (npx playwright install chromium once)
 npm run sheet iso out.png   # contact sheet of the icon library, for reviewing icons
 ```
@@ -80,11 +80,11 @@ src/
   export/     SVG / PNG / PDF / interactive HTML / CSV
 ```
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the data model and design decisions, [docs/ICON_GUIDE.md](docs/ICON_GUIDE.md) to add icons, and [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) for how NetCanvas compares with Cisco's tools, draw.io, Visio, Lucidchart and NetBox.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the data model and design decisions, [docs/ICON_GUIDE.md](docs/ICON_GUIDE.md) to add icons, and [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) for how Network Canvas compares with Cisco's tools, draw.io, Visio, Lucidchart and NetBox.
 
 ## File format
 
-`.netcanvas.json` is plain JSON with stable ids and sorted keys (git-friendly): pages → nodes & links, the VLAN registry, document metadata, and embedded copies of any custom device definitions so a file opens anywhere. See `src/model/types.ts`.
+`.networkcanvas.json` is plain JSON with stable ids and sorted keys (git-friendly): pages → nodes & links, the VLAN registry, document metadata, and embedded copies of any custom device definitions so a file opens anywhere. See `src/model/types.ts`.
 
 ## Roadmap
 
