@@ -9,6 +9,7 @@ import { Viewer } from './viewer/Viewer';
 import { useStore } from './store/store';
 import type { DiagramDoc } from './model/types';
 import { uid } from './model/util';
+import { tryNormalizeDoc } from './model/validate';
 
 declare global {
   interface Window { __NETWORKCANVAS_DOC__?: DiagramDoc; __NETWORKCANVAS_VIEW__?: boolean }
@@ -22,7 +23,8 @@ function embeddedDoc(): unknown {
   if (el?.textContent) { try { return JSON.parse(el.textContent); } catch { return undefined; } }
   return window.__NETWORKCANVAS_VIEW__ ? window.__NETWORKCANVAS_DOC__ : undefined;
 }
-const embedded = embeddedDoc() as DiagramDoc | undefined;
+const rawEmbedded = embeddedDoc();
+const embedded = rawEmbedded ? tryNormalizeDoc(rawEmbedded) : null;
 
 function bootEditor() {
   initPersistence().finally(() => {
