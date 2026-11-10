@@ -59,6 +59,7 @@ class Builder {
     const ports = DEFS[n.defId].ports;
     const p = name ? ports.find((x) => x.name === name) : ports.find((x) => !used.has(x.id) && mediaCompatible(x.media, media as any));
     if (!p) throw new Error(`no free ${media} port on ${n.name} (${n.defId})`);
+    if (name && used.has(p.id)) throw new Error(`port ${name} on ${n.name} is already used`);
     if (p.maxLinks === 1) used.add(p.id);
     return p.id;
   }
@@ -163,8 +164,7 @@ export function createPlant(): DiagramDoc {
   b.zone(core, 'OT DMZ', dmz, 40, 600, 700, 300);
   for (const [i, [id, name]] of ([['server', 'HIST-01'], ['server', 'WSUS-01'], ['server', 'JUMP-01'], ['nas', 'BKP-01'], ['database', 'SQL-OT']] as const).entries()) {
     const d = b.dev(core, id, name, 120 + i * 130, 760, [dmz, `10.20.200.${10 + i}`], PROPS(id, 30 + i, 'MDF'));
-    b.link(core, fwOt, d, 'ethernet', i ? {} : { pa: 'DMZ' });
-    if (i) break; // the remaining DMZ hosts hang off a DMZ switch
+    if (i === 0) b.link(core, fwOt, d, 'ethernet', { pa: 'DMZ' }); // the other DMZ hosts hang off DMZ-SW below
   }
   const dmzSw = b.dev(core, 'switch', 'DMZ-SW', 420, 680, [dmz, '10.20.200.2']);
   b.link(core, fwOt, dmzSw, 'ethernet', { pa: 'MGMT' });
@@ -182,7 +182,7 @@ export function createPlant(): DiagramDoc {
   // IT / enterprise
   const it = b.page('Enterprise IT');
   const acc = [0, 1, 2].map((i) => b.dev(it, 'switch', `IT-SW${i + 1}`, 200 + i * 420, 120, [mgmt, `10.20.99.${40 + i}`]));
-  acc.slice(1).forEach((s) => b.link(it, acc[0], s, 'fiber', { pa: 'SFP1', pb: 'SFP1' }));
+  acc.slice(1).forEach((s, i) => b.link(it, acc[0], s, 'fiber', { pa: i ? 'SFP2' : 'SFP1', pb: 'SFP1' }));
   const hosts: [string, string, Vlan][] = [
     ['server', 'AD-01', srv], ['server', 'FILE-01', srv], ['database', 'ERP-DB', srv], ['nas', 'NAS-01', srv],
     ['pc', 'ENG-WS1', eng], ['pc', 'ENG-WS2', eng], ['laptop', 'ENG-LT1', eng], ['pc', 'OFF-PC1', office], ['pc', 'OFF-PC2', office],
@@ -192,7 +192,7 @@ export function createPlant(): DiagramDoc {
   ];
   hosts.forEach(([id, name, v], k) => {
     const s = acc.at(k % 3)!;
-    const d = b.dev(it, id, name, s.x + (k % 7) * 60 - 120, 320 + Math.floor(k / 3) * 110, [v, `${v.subnet.split('.').slice(0, 3).join('.')}.${20 + k}`], PROPS(id, 200 + k, 'IDF-1'));
+    const d = b.dev(it, id, name, s.x + (k % 7) * 60 - 120, 320 + Math.floor(k / 3) * 110, [v, `${v.subnet.split('.').slice(0, 3).join('.')}.${(v === mgmt ? 60 : 20) + k}`], PROPS(id, 200 + k, 'IDF-1'));
     b.link(it, s, d);
   });
   // the page order the reader expects: core first
