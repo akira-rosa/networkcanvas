@@ -86,7 +86,7 @@ export function runChecks(doc: DiagramDoc, defs: DefMap): Issue[] {
     const prev = seenVlanIds.get(v.vlanId);
     if (prev) add('warning', 'vlan-dup', `VLAN ID ${v.vlanId} is defined twice (“${prev.name}” and “${v.name}”)`, doc.pages[0].id, []);
     seenVlanIds.set(v.vlanId, v);
-    if (v.subnet && /\d+\.\d+/.test(v.subnet) && !parseCidr(v.subnet)) add('info', 'vlan-subnet', `VLAN ${v.vlanId} “${v.name}”: subnet “${v.subnet}” is not valid CIDR (e.g. 192.168.10.0/24)`, doc.pages[0].id, []);
+    if (v.subnet && /\d+\.\d+/.test(v.subnet) && !parseCidr(v.subnet)) add('error', 'vlan-subnet', `VLAN ${v.vlanId} “${v.name}”: subnet “${v.subnet}” is not valid CIDR (e.g. 192.168.10.0/24), so its addresses cannot be checked`, doc.pages[0].id, []);
   }
 
   const namePattern = (() => { try { return doc.namePattern ? new RegExp(doc.namePattern) : null; } catch { return null; } })();
@@ -115,12 +115,21 @@ export function runChecks(doc: DiagramDoc, defs: DefMap): Issue[] {
         if (a.vlan && a.vlan !== 'error' && !vlanById.has(a.vlan)) add('error', 'vlan-missing', `${d.name}: address ${a.value} refers to a VLAN that no longer exists`, page.id, [d.id]);
         if (looksLikeIpAttempt(a.value)) add('info', 'ip-format', `${d.name}: “${a.value}” is not a complete IPv4 address`, page.id, [d.id]);
         const ip = parseIPv4(a.value);
-        if (ip === null) continue;
+        if (ip === null) {
+          if (looksLikeIp(a.value)) add('error', 'ip-format', `${d.name}: “${a.value.trim()}” is not a valid IPv4 address (each part must be 0–255)`, page.id, [d.id]);
+          continue;
+        }
         ipOwners.set(a.value.trim(), [...(ipOwners.get(a.value.trim()) ?? []), { node: d, pageId: page.id }]);
         const cidr = a.vlan ? cidrByVlan.get(a.vlan) : undefined;
         if (cidr && !ipInCidr(ip, cidr)) {
           const v = vlanById.get(a.vlan!)!;
           add('warning', 'ip-subnet', `${d.name}: ${a.value} is outside VLAN ${v.vlanId} “${v.name}” (${v.subnet})`, page.id, [d.id]);
+        } else if (cidr && cidr.bits <= 30) {
+          const bcast = (cidr.net | (~0 >>> cidr.bits)) >>> 0;
+          if (ip === cidr.net || ip === bcast) {
+            const v = vlanById.get(a.vlan!)!;
+            add('error', 'ip-reserved', `${d.name}: ${a.value.trim()} is the ${ip === cidr.net ? 'network' : 'broadcast'} address of VLAN ${v.vlanId} (${v.subnet}) and cannot be used by a device`, page.id, [d.id]);
+          }
         }
       }
 
@@ -146,6 +155,10 @@ export function runChecks(doc: DiagramDoc, defs: DefMap): Issue[] {
         }
       }
     }
+
+    // a page with devices but no links at all is reported once, so it is never called "connected"
+    const linkable = devices.filter((d) => defs[d.defId]?.ports.length && !d.locked);
+    if (!hasLinks && linkable.length > 1) add('info', 'unconnected', `No links on “${page.name}” yet: ${linkable.length} devices are not connected`, page.id, linkable.map((d) => d.id));
 
     for (const [name, list] of names) if (list.length > 1 && name.trim()) add('warning', 'name-dup', `${list.length} devices on “${page.name}” are named “${name}”`, page.id, list.map((x) => x.id));
 
