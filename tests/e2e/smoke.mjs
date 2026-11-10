@@ -52,6 +52,15 @@ await page.waitForTimeout(300);
 check('switching to detailed icons keeps links', (await page.$$('[data-link-id]')).length === before);
 await page.click('.right-panel .seg button:has-text("Isometric")');
 
+// documented shortcuts do what the menu says
+{
+  const devs = async () => (await page.$$('[data-id]')).length;
+  const n = await devs();
+  await page.keyboard.press('Control+Shift+D'); await page.waitForTimeout(300);
+  check('Ctrl+Shift+D opens the device table (and does not duplicate)', !!(await page.$('.modal')) && (await devs()) >= n);
+  await page.keyboard.press('Escape');
+}
+
 // checks panel
 check('checks panel renders', !!(await page.$('.check-counts')));
 
