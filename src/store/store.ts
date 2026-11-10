@@ -60,6 +60,16 @@ interface State {
   clipboard: { nodes: DiagramNode[]; links: Link[] } | null;
   dirty: boolean;
   lastSaved: number;
+  /** why the last save to browser storage failed (shown as a banner until a save succeeds) */
+  saveError: string | null;
+  /** id of a diagram whose stored copy was changed by another tab or window since this one read it */
+  saveConflict: string | null;
+  /** the open diagram is also open in another tab or window */
+  openElsewhere: boolean;
+  /** when the open diagram was last written to (or opened from) a file; null = never */
+  fileSavedAt: number | null;
+  /** false when the browser refuses to store anything (blocked storage, some private modes) */
+  storageOk: boolean;
   /** bumping this asks the canvas to fit the content */
   fitRequest: number;
 
@@ -197,6 +207,11 @@ export const useStore = create<State>((set, get) => ({
   clipboard: null,
   dirty: false,
   lastSaved: 0,
+  saveError: null,
+  saveConflict: null,
+  openElsewhere: false,
+  fileSavedAt: null,
+  storageOk: true,
   fitRequest: 0,
 
   change: (fn, history = true) => {
@@ -244,7 +259,7 @@ export const useStore = create<State>((set, get) => ({
     set({
       doc, pageId: doc.pages[0].id, selection: [], past: [], future: [], gestureBase: null,
       libDefs, defs: styledDefMap(libDefs, doc.iconStyle ?? 'iso'), dirty: false, fitRequest: get().fitRequest + 1,
-      home: false, modal: null, editor: null,
+      home: false, modal: null, editor: null, saveConflict: null, openElsewhere: false, fileSavedAt: null,
       // the library shows the document's icon style (unless the user asked to see all)
       libStyle: get().libStyle === 'all' ? 'all' : doc.iconStyle ?? 'iso',
     });
