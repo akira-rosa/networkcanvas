@@ -16,7 +16,13 @@ declare global {
 
 const root = createRoot(document.getElementById('root')!);
 const sheet = new URLSearchParams(location.search).get('sheet');
-const embedded = window.__NETWORKCANVAS_DOC__;
+// interactive HTML exports carry their diagram in a JSON data block (older exports used a global)
+function embeddedDoc(): unknown {
+  const el = document.getElementById('networkcanvas-doc');
+  if (el?.textContent) { try { return JSON.parse(el.textContent); } catch { return undefined; } }
+  return window.__NETWORKCANVAS_VIEW__ ? window.__NETWORKCANVAS_DOC__ : undefined;
+}
+const embedded = embeddedDoc() as DiagramDoc | undefined;
 
 function bootEditor() {
   initPersistence().finally(() => {
@@ -30,7 +36,7 @@ function bootEditor() {
 
 if (sheet) {
   root.render(<Sheet filter={sheet} />);
-} else if (embedded && window.__NETWORKCANVAS_VIEW__) {
+} else if (embedded) {
   // interactive export: read-only viewer; "Edit" opens the editor with a copy of the embedded diagram
   const onEdit = () => {
     useStore.setState({ readOnly: false, hideUi: false });

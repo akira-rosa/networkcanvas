@@ -75,6 +75,7 @@ check('cable schedule CSV', csv.name.endsWith('.csv') && csv.size > 500);
 const v = await ctx.newPage();
 const verrors = [];
 v.on('pageerror', (e) => verrors.push(e.message));
+v.on('console', (m) => { if (m.type() === 'error') verrors.push(m.text()); });
 await v.goto('file://' + html.path); await v.waitForTimeout(1200);
 check('viewer renders the embedded diagram', (await v.$$('[data-id]')).length > 40 && !!(await v.$('.editor-badge')));
 check('viewer has no errors', verrors.length === 0, verrors.join(' | '));
@@ -84,6 +85,15 @@ await v.close();
 await page.click('button:has-text("New device")'); await page.waitForTimeout(300);
 await page.locator('.editor .right-panel .insp-section').nth(0).locator('input').nth(0).fill('E2E Device');
 await page.keyboard.press('Enter');
+// a vendor icon carrying script is imported as drawing only
+{
+  const evil = join(tmp, 'evil-icon.svg');
+  writeFileSync(evil, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#36c"/><image href="x" onerror="window.__pwned=1"/><foreignObject><img xmlns="http://www.w3.org/1999/xhtml" src="x" onerror="window.__pwned=1"/></foreignObject></svg>');
+  const [fc] = await Promise.all([page.waitForEvent('filechooser'), page.click('button:has-text("SVG as shapes")')]);
+  await fc.setFiles(evil); await page.waitForTimeout(800);
+  check('SVG import never runs embedded script', !(await page.evaluate(() => window.__pwned)));
+}
+
 await page.keyboard.press('b'); await page.mouse.move(600, 300); await page.mouse.down(); await page.mouse.move(800, 480, { steps: 4 }); await page.mouse.up();
 await page.keyboard.press('n'); await page.mouse.click(700, 300);
 await page.click('button:has-text("Save to library")'); await page.waitForTimeout(300);
