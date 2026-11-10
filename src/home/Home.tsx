@@ -15,6 +15,7 @@ import type { DiagramDoc, IconStyle } from '../model/types';
 import { ContextMenu, type MenuItem } from '../ui/ContextMenu';
 import { IconButton, Modal } from '../ui/controls';
 import { modKey } from '../model/util';
+import { ErrorBoundary } from '../ErrorBoundary';
 
 /** Start screen: the diagrams stored in this browser, plus ways to start a new one. */
 export function Home() {
@@ -222,12 +223,17 @@ function RenameField({ value, onDone }: { value: string; onDone: (v: string | nu
 function DocThumb({ id, updatedAt }: { id: string; updatedAt: number }) {
   const [doc, setDoc] = useState<DiagramDoc | null | undefined>(undefined);
   useEffect(() => { let live = true; readDoc(id).then((d) => live && setDoc(d ?? null)).catch(() => live && setDoc(null)); return () => { live = false; }; }, [id, updatedAt]);
-  return <Thumb doc={doc} />;
+  if (doc === null) return <div className="thumb"><span className="thumb-empty">Damaged — use ⋯ › Download as file</span></div>;
+  return (
+    <ErrorBoundary fallback={() => <div className="thumb"><span className="thumb-empty">Preview unavailable</span></div>}>
+      <Thumb doc={doc} />
+    </ErrorBoundary>
+  );
 }
 
 function ExampleThumb() {
   const doc = useMemo(() => createSampleDoc(), []);
-  return <Thumb doc={doc} />;
+  return <ErrorBoundary fallback={() => <div className="thumb" />}><Thumb doc={doc} /></ErrorBoundary>;
 }
 
 function Thumb({ doc }: { doc: DiagramDoc | null | undefined }) {

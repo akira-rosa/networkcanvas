@@ -9,6 +9,7 @@ import { Viewer } from './viewer/Viewer';
 import { useStore } from './store/store';
 import type { DiagramDoc } from './model/types';
 import { uid } from './model/util';
+import { tryNormalizeDoc } from './model/validate';
 
 declare global {
   interface Window { __NETWORKCANVAS_DOC__?: DiagramDoc; __NETWORKCANVAS_VIEW__?: boolean }
@@ -16,7 +17,7 @@ declare global {
 
 const root = createRoot(document.getElementById('root')!);
 const sheet = new URLSearchParams(location.search).get('sheet');
-const embedded = window.__NETWORKCANVAS_DOC__;
+const embedded = window.__NETWORKCANVAS_DOC__ ? tryNormalizeDoc(window.__NETWORKCANVAS_DOC__) : null;
 
 function bootEditor() {
   initPersistence().finally(() => {
