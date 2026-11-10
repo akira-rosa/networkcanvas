@@ -72,20 +72,41 @@ export async function exportSvg(o: ExportOpts) {
   downloadText(`${safeName(useStore.getState().doc.name)} - ${safeName(currentPage().name)}.svg`, svg, 'image/svg+xml');
 }
 
+/** Largest bitmap browsers reliably create (WebKit on iPad/iPhone is much lower than desktop Chromium/Firefox). */
+function canvasLimits() {
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  return { side: ios ? 4096 : 16384, area: ios ? 16_700_000 : 120_000_000 };
+}
+
 export async function exportPng(o: ExportOpts) {
   const { svg, w, h } = await buildSvg(o);
+  const lim = canvasLimits();
+  const scale = Math.min(o.scale, lim.side / Math.max(w, h), Math.sqrt(lim.area / (w * h)));
   const img = new Image();
   const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
   await new Promise<void>((res, rej) => { img.onload = () => res(); img.onerror = rej; img.src = url; });
   const c = document.createElement('canvas');
-  c.width = Math.round(w * o.scale);
-  c.height = Math.round(h * o.scale);
-  const ctx = c.getContext('2d')!;
-  ctx.scale(o.scale, o.scale);
+  c.width = Math.max(1, Math.floor(w * scale));
+  c.height = Math.max(1, Math.floor(h * scale));
+  const ctx = c.getContext('2d');
+  if (!ctx) { URL.revokeObjectURL(url); throw new Error('the browser could not create an image this large. Export SVG or PDF instead.'); }
+  ctx.scale(scale, scale);
   ctx.drawImage(img, 0, 0, w, h);
   URL.revokeObjectURL(url);
-  const blob: Blob = await new Promise((r) => c.toBlob((b) => r(b!), 'image/png'));
+  const blob = await new Promise<Blob | null>((r) => c.toBlob(r, 'image/png'));
+  if (!blob) throw new Error('the browser could not create an image this large. Export SVG or PDF instead.');
   downloadBlob(`${safeName(useStore.getState().doc.name)} - ${safeName(currentPage().name)}.png`, blob);
+  if (scale < o.scale - 0.01) useStore.getState().toast(`This page is large, so the PNG was made at ${scale.toFixed(1)}× instead of ${o.scale}× (browser limit). For printing, export SVG or PDF.`, 'info');
+}
+
+/**
+ * One CSV cell. Text that a spreadsheet would read as a formula (=, +, -, @, tab, CR) gets a leading
+ * apostrophe, so names like "+CAB1-K1" stay text and crafted cells cannot run formulas or DDE.
+ */
+export function csvCell(v: unknown): string {
+  let t = String(v ?? '');
+  if (/^[=+\-@\t\r]/.test(t)) t = "'" + t;
+  return `"${t.replace(/"/g, '""')}"`;
 }
 
 /** Device inventory as CSV (name, type, addresses, properties). */
@@ -105,7 +126,7 @@ export function exportInventoryCsv() {
       ]);
     }
   }
-  const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const csv = rows.map((r) => r.map(csvCell).join(',')).join('\r\n');
   downloadText(`${safeName(s.doc.name)} - inventory.csv`, '﻿' + csv, 'text/csv');
 }
 
@@ -122,7 +143,7 @@ export function exportCableScheduleCsv() {
       rows.push([p.name, name(a), l.fromLabel ?? portName(a, l.from.port), name(b), l.toLabel ?? portName(b, l.to.port), l.media, l.speed ?? '', l.vlans ?? '', l.cableId ?? '', l.label ?? '', l.notes ?? '']);
     }
   }
-  const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const csv = rows.map((r) => r.map(csvCell).join(',')).join('\r\n');
   downloadText(`${safeName(s.doc.name)} - cable schedule.csv`, '﻿' + csv, 'text/csv');
 }
 
@@ -132,7 +153,8 @@ export async function exportPdf(o: ExportOpts & { allPages?: boolean }) {
   const pages = o.allPages ? s.doc.pages : [s.doc.pages.find((p) => p.id === s.pageId) ?? s.doc.pages[0]];
   const svgs: { name: string; svg: string; w: number; h: number }[] = [];
   for (const p of pages) {
-    const r = await buildSvg({ ...o, pageId: p.id, selectionOnly: false });
+    // paper is white: always the light drawing, without a background fill
+    const r = await buildSvg({ ...o, theme: 'light', background: false, pageId: p.id, selectionOnly: false });
     svgs.push({ name: p.name, ...r });
   }
   const win = window.open('', '_blank');

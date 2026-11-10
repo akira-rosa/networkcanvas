@@ -92,7 +92,7 @@ export function TopBar() {
     { label: 'Save as…', shortcut: 'Ctrl+Shift+S', action: () => saveToFile(true) },
     { sep: true },
     { label: 'Export…', shortcut: 'Ctrl+E', action: () => s.set({ modal: 'export' }) },
-    { label: 'Quick export PNG (2×)', action: () => exportPng(exportOpts) },
+    { label: 'Quick export PNG (2×)', action: () => exportPng(exportOpts).catch((e) => s.toast('Export failed: ' + (e?.message ?? e), 'error')) },
     { label: 'Quick export SVG', action: () => exportSvg(exportOpts) },
     { label: 'Print / PDF', action: () => exportPdf({ ...exportOpts, allPages: false }) },
     { label: 'Export device inventory (CSV)', action: exportInventoryCsv },
