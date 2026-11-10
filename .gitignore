@@ -7,3 +7,4 @@ Thumbs.db
 coverage/
 /NetworkCanvas.html
 /playwright-report/
+tests/fixtures/site.networkcanvas.json
