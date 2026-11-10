@@ -489,3 +489,9 @@ kbd {
   .start-plus, .start-example .thumb { width: 112px; }
   .home-search input { width: 120px; }
 }
+
+/* ---------- CSV import ---------- */
+.import-warn { margin: 0 0 8px; padding: 8px 10px; border-radius: 6px; background: rgba(245, 165, 36, 0.12); border: 1px solid rgba(245, 165, 36, 0.4); color: var(--text); }
+.import-type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px 12px; max-height: 22vh; overflow: auto; }
+.import-type { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 8px; align-items: center; }
+.import-type.unmatched > span { color: #d97706; font-weight: 600; }

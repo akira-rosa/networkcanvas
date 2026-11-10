@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Reliable CSV import:** one separator per file (detected, or Excel’s `sep=` line), proper quoting, Windows-1252 files from PT/ES Excel, and binary files refused. Columns map only by exact header names (EN/PT/ES), so “Equipment No.” or “mac_address” can no longer overwrite IP addresses. Each type value is matched to a library device, with a table to correct it. Existing devices are updated by name on any page. A VLAN column assigns the addresses’ VLAN. Every skipped value is reported.
 - **Start screen**: the app opens on a manager for the diagrams saved in this browser (previews, search, sort, rename, duplicate, download, delete, drag-and-drop a file to open) with *New topology* (name + icon style) and *Open the example*. The Smart4.0 sample is no longer opened automatically. The editor's house button / *File → All diagrams* return to it; the old *My diagrams* dialog is gone.
 - Library: devices added by clicking line up in free slots instead of piling up; clicking two different cards quickly adds both; the style filter follows the open diagram's icon style.
 - Renamed the project to **Network Canvas**: the build is `NetworkCanvas.html`, diagrams save as `.networkcanvas.json` (files saved under the old `.netcanvas.json` name still open), library packs use the `networkcanvas-library` format (old packs still import).
