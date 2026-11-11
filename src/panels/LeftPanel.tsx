@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, type ReactNode } from 'react';
+import React, { useMemo, useState, type ReactNode } from 'react';
 import {
   Plus, Search, Eye, EyeOff, Lock, Unlock, Box, SquareDashed, Type, Square, LayoutGrid, Table2, Spline, FileText, MoreHorizontal,
   Upload, Download, Image as ImageIcon, MessageSquare, PanelTop, Layers3,
@@ -98,10 +98,6 @@ function Library() {
   const libStyle = useStore((s) => s.libStyle);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [menu, setMenu] = useState<{ x: number; y: number; items: MenuItem[] } | null>(null);
-  // a single click adds after a short delay so a double-click can open the editor instead;
-  // clicking a different card meanwhile adds the pending one right away
-  const pendingAdd = useRef<{ def: DeviceDef; timer: number } | null>(null);
-  const flushPending = () => { const p = pendingAdd.current; if (p) { window.clearTimeout(p.timer); pendingAdd.current = null; addToCanvas(p.def); } };
 
   const groups = useMemo(() => {
     const list = Object.values(defs)
@@ -189,20 +185,17 @@ function Library() {
                     key={d.id}
                     className="lib-item"
                     draggable
-                    title={`${d.name}${d.description ? ' — ' + d.description : ''}\n${d.ports.length} ports · drag onto canvas · double-click to edit`}
+                    title={`${d.name}${d.description ? ' — ' + d.description : ''}\n${d.ports.length} ports · click to add, or drag onto the canvas · ⋯ to edit`}
+                    role="button" tabIndex={0} aria-label={`Add ${d.name}`}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addToCanvas(d); } }}
                     onDragStart={(e) => { e.dataTransfer.setData('application/x-networkcanvas-def', d.id); e.dataTransfer.effectAllowed = 'copy'; }}
-                    onClick={() => {
-                      if (pendingAdd.current?.def.id === d.id) { window.clearTimeout(pendingAdd.current.timer); pendingAdd.current = null; return; }
-                      flushPending();
-                      pendingAdd.current = { def: d, timer: window.setTimeout(() => { pendingAdd.current = null; addToCanvas(d); }, 260) };
-                    }}
-                    onDoubleClick={() => { if (pendingAdd.current?.def.id === d.id) { window.clearTimeout(pendingAdd.current.timer); pendingAdd.current = null; } s.openEditor(d); }}
+                    onClick={() => addToCanvas(d)}
                     onContextMenu={(e) => itemMenu(e, d)}
                   >
                     <div className="lib-thumb"><DefThumb def={d} size={40} /></div>
                     <span className="lib-name">{d.name}</span>
                     {userIds.has(d.id) && <span className="lib-badge" title="Custom / modified">●</span>}
-                    <button className="lib-more" onClick={(e) => { e.stopPropagation(); itemMenu(e, d); }}><MoreHorizontal size={13} /></button>
+                    <button className="lib-more" aria-label={`More actions for ${d.name}`} title="Edit, export, delete…" onClick={(e) => { e.stopPropagation(); itemMenu(e, d); }}><MoreHorizontal size={13} /></button>
                   </div>
                 ))}
               </div>

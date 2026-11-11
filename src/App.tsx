@@ -37,8 +37,8 @@ function useShortcuts() {
       if (mod && k === 'c') { s.copy(); return; }
       if (mod && k === 'x') { s.copy(); s.deleteSelection(); return; }
       if (mod && k === 'v') { e.preventDefault(); s.paste(); return; }
-      if (mod && k === 'd') { e.preventDefault(); s.duplicate(); return; }
-      if (mod && k === 'a') { e.preventDefault(); s.selectAll(); return; }
+      if (mod && !e.shiftKey && k === 'd') { e.preventDefault(); s.duplicate(); return; }
+      if (mod && !e.shiftKey && k === 'a') { e.preventDefault(); s.selectAll(); return; }
       if (mod && k === 'f') { e.preventDefault(); s.set({ modal: 'find' }); return; }
       if (mod && e.shiftKey && k === 'g') { e.preventDefault(); s.ungroup(); return; }
       if (mod && e.shiftKey && k === 'a') { e.preventDefault(); s.autoLayout(); return; }

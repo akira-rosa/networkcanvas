@@ -50,7 +50,7 @@ await shot('detail-detailed', 'dark', async (page) => {
 });
 await shot('device-editor', 'dark', async (page) => {
   await page.click('.seg button:has-text("Detailed")');
-  await page.dblclick('.lib-item:has-text("PLC (modular)")');
+  await page.click('.lib-item:has-text("PLC (modular)") .lib-more'); await page.click('.ctx-item:has-text("Edit in device editor")');
   await page.waitForTimeout(500);
 });
 await shot('checks-and-table', 'dark', async (page) => {

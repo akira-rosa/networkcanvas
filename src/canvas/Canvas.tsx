@@ -253,18 +253,19 @@ export function Canvas() {
     if (e.button !== 0) return;
     svg.setPointerCapture(e.pointerId);
 
+    // drill-down badges open their page, in the editor and in the read-only viewer
+    const pageLinkEl = target.closest('[data-pagelink]');
+    if (pageLinkEl) {
+      const n = page.nodes[pageLinkEl.getAttribute('data-pagelink')!];
+      if (n?.pageLink && doc.pages.some((p) => p.id === n.pageLink)) { s.setPage(n.pageLink); return; }
+    }
+
     if (s.readOnly) {
       // viewer: click selects, drag pans
       const id = target.closest('[data-id]')?.getAttribute('data-id') ?? target.closest('[data-link-id]')?.getAttribute('data-link-id');
       s.select(id ? [id] : []);
       setDrag({ kind: 'pan', sx: e.clientX, sy: e.clientY, vx: vp.x, vy: vp.y });
       return;
-    }
-
-    const pageLinkEl = target.closest('[data-pagelink]');
-    if (pageLinkEl) {
-      const n = page.nodes[pageLinkEl.getAttribute('data-pagelink')!];
-      if (n?.pageLink && doc.pages.some((p) => p.id === n.pageLink)) { s.setPage(n.pageLink); return; }
     }
     const portEl = target.closest('[data-port]');
     const handleEl = target.closest('[data-handle]');
