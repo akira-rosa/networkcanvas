@@ -118,6 +118,22 @@ await page.click('button[title="All diagrams"]'); await page.waitForTimeout(400)
 await page.keyboard.press('n'); await page.fill('#new-topo-name', 'E2E new'); await page.click('button:has-text("Create topology")'); await page.waitForTimeout(400);
 check('new topology from the start screen', (await page.inputValue('.doc-name input')) === 'E2E new' && (await page.$$('.canvas-area [data-id]')).length === 0);
 
+// drawing sheets: an A3 sheet on the page shows its frame on the canvas, and Ctrl+P prints it at A3
+{
+  await page.keyboard.press('Escape');
+  const cb = await (await page.$('.canvas-area')).boundingBox();
+  await page.mouse.click(cb.x + 8, cb.y + 8); await page.waitForTimeout(200);
+  await page.locator('.right-panel .insp-section:has-text("Sheet") select').selectOption('A3'); await page.waitForTimeout(300);
+  check('a page sheet draws its frame and title block on the canvas', (await page.$$('.canvas-area [data-sheet-frame] [data-title-block]')).length === 1);
+  await page.evaluate(() => { window.print = () => {}; });
+  const [pw] = await Promise.all([ctx.waitForEvent('page'), page.keyboard.press('Control+p')]);
+  await pw.waitForLoadState(); await pw.evaluate(() => { window.print = () => {}; });
+  const text = await pw.$eval('.sheet', (e) => e.textContent ?? '').catch(() => '');
+  const width = await pw.$eval('.sheet', (e) => getComputedStyle(e).width).catch(() => '');
+  check('Ctrl+P prints the drawing sheets at their paper size with sheet numbers', /\d+ of \d+/.test(text) && Math.abs(parseFloat(width) - (420 * 96) / 25.4) < 2, `${width} …${text.slice(-30)}`);
+  await pw.close();
+}
+
 // the same diagram in two tabs: the second is warned, and a stale save is refused instead of overwriting
 {
   const t2 = await ctx.newPage(); t2.on('dialog', (d) => d.accept());

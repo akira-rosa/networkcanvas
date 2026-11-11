@@ -24,7 +24,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
     try {
       if (format === 'png') await exportPng(opts);
       else if (format === 'svg') await exportSvg(opts);
-      else if (format === 'pdf') await exportPdf({ ...opts, allPages });
+      else if (format === 'pdf') await exportPdf({ allPages });
       else if (format === 'html') exportViewerHtml();
       else if (format === 'csv-devices') exportInventoryCsv();
       else if (format === 'csv-cables') exportCableScheduleCsv();
@@ -39,7 +39,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
   const formats: { id: Format; label: string; hint: string; icon: React.ReactNode }[] = [
     { id: 'png', label: 'PNG image', hint: 'Raster image for slides, wikis and chat', icon: <FileImage size={18} /> },
     { id: 'svg', label: 'SVG vector', hint: 'Crisp at any size; fonts embedded; editable in Inkscape/Illustrator', icon: <FileCode2 size={18} /> },
-    { id: 'pdf', label: 'PDF / print', hint: 'One sheet per page via the browser print dialog', icon: <Printer size={18} /> },
+    { id: 'pdf', label: 'PDF / print', hint: 'Drawing sheets with frame and title block, at each page’s sheet size', icon: <Printer size={18} /> },
     { id: 'html', label: 'Interactive HTML', hint: 'Self-contained viewer: pan, zoom, search, hover details — opens offline', icon: <Globe size={18} /> },
     { id: 'csv-devices', label: 'Device inventory (CSV)', hint: 'Every device with type, addresses, VLANs and properties', icon: <Table2 size={18} /> },
     { id: 'csv-cables', label: 'Cable schedule (CSV)', hint: 'Every link with both ends, ports, media, speed, VLANs and cable IDs', icon: <Table2 size={18} /> },
@@ -72,7 +72,8 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
                   : <Select value={theme} onChange={setTheme} options={[{ value: 'current', label: `Current (${s.theme})` }, { value: 'dark', label: 'Dark' }, { value: 'light', label: 'Light' }]} />}
               </Row>
               {format === 'png' && <Row label="Scale"><Select value={String(scale)} onChange={(v) => setScale(Number(v))} options={[{ value: '1', label: '1× (screen)' }, { value: '2', label: '2× (default)' }, { value: '3', label: '3×' }, { value: '4', label: '4× (print)' }]} /></Row>}
-              <Row label="Padding"><NumInput value={padding} min={0} max={400} precision={0} onChange={setPadding} suffix="px" /></Row>
+              {format !== 'pdf' && <Row label="Padding"><NumInput value={padding} min={0} max={400} precision={0} onChange={setPadding} suffix="px" /></Row>}
+              {format === 'pdf' && <div className="hint" style={{ lineHeight: 1.6 }}>Each page prints on the sheets set under <b>Sheet</b> in the page’s properties (click an empty spot on the canvas). Pages without a sheet print on one A3 landscape sheet.</div>}
               {format !== 'pdf' && <Row><Toggle label="Background colour (off = transparent)" checked={background} onChange={setBackground} /></Row>}
               {format !== 'pdf' && <Row><Toggle label={`Selection only${s.selection.length ? ` (${s.selection.length} objects)` : ' — nothing selected'}`} checked={selectionOnly && !!s.selection.length} onChange={setSelectionOnly} /></Row>}
               {format === 'pdf' && s.doc.pages.length > 1 && <Row><Toggle label={`All ${s.doc.pages.length} pages`} checked={allPages} onChange={setAllPages} /></Row>}

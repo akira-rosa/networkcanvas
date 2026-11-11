@@ -3,8 +3,12 @@
 import type { DeviceNode, DiagramDoc, Vlan } from './types';
 import type { DefMap } from './geometry';
 import { mediaCompatible, portUsage } from './geometry';
-import { nodeRect } from './geometry';
-import { rectContains } from './util';
+import { nodeRect, nodeVisualRect } from './geometry';
+import { rectContains, type Rect } from './util';
+import { MIN_TEXT_MM, sheetBounds, smallestTextMm, tiles } from './sheet';
+
+const rectInside = (r: Rect, b: Rect) => r.x >= b.x - 0.5 && r.y >= b.y - 0.5 && r.x + r.w <= b.x + b.w + 0.5 && r.y + r.h <= b.y + b.h + 0.5;
+const rectsOverlap = (a: Rect, b: Rect) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
 export type Severity = 'error' | 'warning' | 'info';
 
@@ -180,6 +184,27 @@ export function runChecks(doc: DiagramDoc, defs: DefMap): Issue[] {
         add('warning', 'link-media', `Link ${(a as DeviceNode).name} → ${(b as DeviceNode).name}: ${medias[0]} port connected to ${medias[1]} port`, page.id, [l.id]);
       }
     }
+  }
+
+  // print sheets: everything on the sheets, nothing under a title block, text large enough
+  for (const page of doc.pages) {
+    const sh = page.sheet;
+    if (!sh) continue;
+    const bounds = sheetBounds(sh);
+    const blocks = tiles(sh).filter((t) => t.row === sh.rows - 1).map((t) => t.titleBlock);
+    const outside: string[] = [], under: string[] = [];
+    for (const id of page.order) {
+      const node = page.nodes[id];
+      if (!node || node.hidden) continue;
+      const r = nodeVisualRect(node, page, defs, doc.vlans);
+      if (!rectInside(r, bounds)) outside.push(id);
+      else if (blocks.some((b) => rectsOverlap(r, b))) under.push(id);
+    }
+    const some = (ids: string[]) => (ids.length === 1 ? '1 object' : `${ids.length} objects`);
+    if (outside.length) add('warning', 'sheet-outside', `Page “${page.name}”: ${some(outside)} reach beyond the print sheet and will be cut off (use Fit to drawing)`, page.id, outside);
+    if (under.length) add('warning', 'sheet-title-block', `Page “${page.name}”: ${some(under)} sit under the title block and will be hidden in print`, page.id, under);
+    const mm = smallestTextMm(sh);
+    if (mm < MIN_TEXT_MM) add('warning', 'sheet-text-small', `Page “${page.name}”: port labels print at ${mm.toFixed(1)} mm, too small to read; use a larger paper, more sheets or a higher scale`, page.id, []);
   }
 
   for (const [ip, owners] of ipOwners) {

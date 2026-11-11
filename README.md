@@ -44,7 +44,7 @@ Everything runs in the browser from one HTML file: no install, no account, no in
 - **Device editor**: rectangles, ellipses, pen/polygon with point editing, text, isometric box & cylinder primitives with automatic shading, gradients, per-corner radii, rotation, align/distribute, repeat/array, trace a reference photo, SVG import as editable shapes, copy/paste style. Place **ports** with media, exit side and capacity — or generate `Gi1/0/{n}` runs — and define property templates. Save to your library, export/import library packs, override or reset built-ins.
 
 **Output**
-- PNG (1–4×), SVG (fonts embedded), **PDF/print** (one sheet per page), **interactive HTML** (a self-contained viewer with pan/zoom, pages, search, hover cards and device details — and an *Edit* button that turns it back into the full editor), device inventory CSV and **cable schedule** CSV.
+- PNG (1–4×), SVG (fonts embedded), **PDF/print** on drawing sheets (A4–A0, Letter, Tabloid, tiled if needed, with ISO 5457 frame, title block and sheet numbering), **interactive HTML** (a self-contained viewer with pan/zoom, pages, search, hover cards and device details — and an *Edit* button that turns it back into the full editor), device inventory CSV and **cable schedule** CSV.
 - Light and dark themes (follows your OS by default); exports can use either.
 
 <p align="center">

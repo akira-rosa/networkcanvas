@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { currentPage, usePage, useStore, placementDefId } from '../store/store';
 import { DiagramLayer, dashArray, layerHidden, layerLocked } from '../render/DiagramLayer';
+import { SheetOverlay } from '../render/SheetOverlay';
+import { paperBounds } from '../model/sheet';
 import { canvasThemes, MEDIA_COLORS, FONT } from '../render/theme';
 import type { DeviceNode, DiagramNode, Endpoint, Link, PortDef, Viewport } from '../model/types';
 import {
@@ -90,7 +92,8 @@ export function Canvas() {
     const s = store();
     const pg = currentPage();
     const rects = pg.order.map((id) => pg.nodes[id]).filter((n) => n && !n.hidden).map((n) => nodeVisualRect(n, pg, s.defs, s.doc.vlans));
-    const b = unionRects(rects);
+    // a page with a print sheet fits the whole paper, so the sheet is visible after Fit
+    const b = unionRects(pg.sheet ? [...rects, paperBounds(pg.sheet)] : rects);
     const el = svgRef.current;
     if (!el) return;
     const W = el.clientWidth, H = el.clientHeight;
@@ -753,6 +756,7 @@ export function Canvas() {
         </defs>
         <g transform={`translate(${vp.x} ${vp.y}) scale(${z})`}>
           {showGrid && <rect x={view.x - gridStep} y={view.y - gridStep} width={view.w + gridStep * 2} height={view.h + gridStep * 2} fill="url(#grid)" />}
+          {page.sheet && <SheetOverlay doc={doc} page={page} sheet={page.sheet} theme={theme} />}
           <DiagramLayer page={page} defs={defs} vlans={doc.vlans} theme={theme} interactive editingId={editing?.field !== 'label' ? editing?.id : null}
             linkColorByMedia={doc.linkColorByMedia} lineJumps={doc.lineJumps} hidePortLabels={doc.hidePortLabels} doc={doc} layers={doc.layers} />
 
