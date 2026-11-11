@@ -74,6 +74,7 @@ const SHORTCUTS: [string, string][] = [
   ['Shift+1 · Shift+2 · Ctrl+0', 'Zoom to fit · zoom to selection · 100%'],
   ['Ctrl+F', 'Find devices, addresses, texts'],
   ['Ctrl+E', 'Export…'],
+  ['Ctrl+P', 'Print all sheets / PDF'],
   ['Ctrl+Shift+D · Ctrl+Shift+A', 'Device table · auto-arrange as tree'],
   ['Ctrl+G · Ctrl+Shift+G', 'Group · ungroup'],
   ['Ctrl+\\', 'Hide / show side panels'],

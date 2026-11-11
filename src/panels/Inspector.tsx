@@ -15,6 +15,9 @@ import { nodeLabel } from './LeftPanel';
 import { runChecks, nextFreeIp, type Issue } from '../model/checks';
 import { vlanForIp } from './DeviceTable';
 import { canvasApi } from '../canvas/api';
+import { MAX_TILES, MIN_TEXT_MM, PAPER, PAPER_SIZES, fitSheet, rescale, scalePercent, sheetNumbers, smallestTextMm, unitsPerMmFor } from '../model/sheet';
+import { pageContentRect } from '../export/exporters';
+import type { PaperSize, SheetSetup } from '../model/types';
 
 const NO_LAYERS: import('../model/types').Layer[] = [];
 
@@ -553,6 +556,53 @@ function ChecksSection() {
   );
 }
 
+/** print sheet of the current page: paper, orientation, tiles and scale */
+function SheetSection() {
+  const s = useStore();
+  const page = usePage();
+  const sh = page.sheet;
+  const set = (next: SheetSetup | undefined) => s.change((_d, pg) => { if (next) pg.sheet = next; else delete pg.sheet; });
+  const refit = (base: Omit<SheetSetup, 'x' | 'y' | 'unitsPerMm'>) => { set(fitSheet(base, pageContentRect(page))); canvasApi.fit(); };
+  const base = sh ? { size: sh.size, orientation: sh.orientation, cols: sh.cols, rows: sh.rows } : null;
+  const nums = sheetNumbers(s.doc);
+  const mine = nums.pages[page.id];
+  const textMm = sh ? smallestTextMm(sh) : 0;
+  return (
+    <Section title="Sheet">
+      <Row label="Paper">
+        <Select<PaperSize | 'none'> value={sh?.size ?? 'none'}
+          onChange={(v) => (v === 'none' ? set(undefined) : refit({ size: v, orientation: base?.orientation ?? 'landscape', cols: base?.cols ?? 1, rows: base?.rows ?? 1 }))}
+          options={[{ value: 'none', label: 'No sheet (prints on A3)' }, ...PAPER_SIZES.map((k) => ({ value: k, label: `${PAPER[k].label} (${PAPER[k].long} × ${PAPER[k].short} mm)` }))]} />
+      </Row>
+      {sh && base && (
+        <>
+          <Row label="Orientation">
+            <div className="seg" style={{ margin: 0, flex: 1 }}>
+              {(['landscape', 'portrait'] as const).map((o) => (
+                <button key={o} className={sh.orientation === o ? 'active' : ''} onClick={() => refit({ ...base, orientation: o })}>{o === 'landscape' ? 'Landscape' : 'Portrait'}</button>
+              ))}
+            </div>
+          </Row>
+          <Row label="Sheets">
+            <NumInput label="Across" value={sh.cols} min={1} max={MAX_TILES} precision={0} onChange={(v) => refit({ ...base, cols: Math.round(v) })} />
+            <NumInput label="Down" value={sh.rows} min={1} max={MAX_TILES} precision={0} onChange={(v) => refit({ ...base, rows: Math.round(v) })} />
+          </Row>
+          <Row label="Scale">
+            <NumInput value={scalePercent(sh)} min={5} max={400} precision={0} suffix="%" onChange={(v) => set(rescale(sh, unitsPerMmFor(v)))} />
+            <button className="btn ghost xs" title="Scale and centre the sheets on everything on this page" onClick={() => refit(base)}>Fit to drawing</button>
+          </Row>
+          <div className="hint pad" data-sheet-summary>
+            {mine.count > 1 ? `Sheets ${mine.first}–${mine.first + mine.count - 1}` : `Sheet ${mine.first}`} of {nums.total}.{' '}
+            <span style={textMm < MIN_TEXT_MM ? { color: SEV_COLOR.warning } : undefined}>
+              Smallest text prints at {textMm.toFixed(1)} mm{textMm < MIN_TEXT_MM ? ': too small to read reliably; use a larger paper, more sheets or a higher scale' : ''}.
+            </span>
+          </div>
+        </>
+      )}
+    </Section>
+  );
+}
+
 function DocInspector() {
   const s = useStore();
   const page = usePage();
@@ -578,6 +628,7 @@ function DocInspector() {
           <div><b>{s.doc.vlans.length}</b><span>VLANs</span></div>
         </div>
       </Section>
+      <SheetSection />
       <Section title="VLANs" actions={<button className="btn ghost xs" onClick={() => s.set({ modal: 'vlans' })}>Manage</button>}>
         <div className="vlan-mini">
           {s.doc.vlans.map((v) => (

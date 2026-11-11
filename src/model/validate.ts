@@ -5,7 +5,8 @@
 //   - colours and image references are restricted to safe values, so a crafted file cannot make
 //     the app (or an export) fetch a URL or run script;
 //   - files from a newer format version are refused instead of being half-understood.
-import type { Address, DeviceDef, DiagramDoc, DiagramNode, Layer, Link, Page, Vlan } from './types';
+import type { Address, DeviceDef, DiagramDoc, DiagramNode, Layer, Link, Page, SheetSetup, Vlan } from './types';
+import { MAX_TILES, PAPER } from './sheet';
 import { uid } from './util';
 
 /** The file-format version this build reads and writes. Bump it with a migration in MIGRATIONS. */
@@ -164,7 +165,26 @@ function page(raw: unknown, i: number, warn: (m: string) => void): Page {
     const ok = link(l, id, out, warn);
     if (ok) out.links[id] = ok;
   }
+  delete out.sheet;
+  const sh = sheet(p.sheet);
+  if (sh) out.sheet = sh;
+  else if (p.sheet !== undefined) warn(`The print sheet of page “${out.name}” was not understood and was reset.`);
   return out;
+}
+
+function sheet(raw: unknown): SheetSetup | undefined {
+  if (!isObj(raw) || typeof raw.size !== 'string' || !Object.hasOwn(PAPER, raw.size)) return undefined;
+  const k = num(raw.unitsPerMm);
+  const tiles = (v: unknown) => Math.min(MAX_TILES, Math.max(1, Math.round(num(v) ?? 1)));
+  return {
+    size: raw.size as SheetSetup['size'],
+    orientation: raw.orientation === 'portrait' ? 'portrait' : 'landscape',
+    x: num(raw.x) ?? 0,
+    y: num(raw.y) ?? 0,
+    unitsPerMm: k && k >= 0.05 && k <= 1000 ? k : 96 / 25.4,
+    cols: tiles(raw.cols),
+    rows: tiles(raw.rows),
+  };
 }
 
 function vlan(raw: unknown): Vlan | null {

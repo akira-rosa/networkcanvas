@@ -317,12 +317,31 @@ export interface Link {
   showMeta?: boolean;
 }
 
+export type PaperSize = 'A4' | 'A3' | 'A2' | 'A1' | 'A0' | 'Letter' | 'Tabloid';
+
+/**
+ * How a page prints: paper size, orientation, how many canvas units one millimetre of paper
+ * holds, and a grid of tiles for drawings larger than one sheet. (x, y) is the top-left corner
+ * of the first tile's drawing frame on the canvas. See src/model/sheet.ts.
+ */
+export interface SheetSetup {
+  size: PaperSize;
+  orientation: 'landscape' | 'portrait';
+  x: number;
+  y: number;
+  unitsPerMm: number;
+  cols: number;
+  rows: number;
+}
+
 export interface Page {
   id: ID;
   name: string;
   nodes: Record<ID, DiagramNode>;
   order: ID[]; // z-order, bottom → top
   links: Record<ID, Link>;
+  /** print setup; without one, printing fits the page on one A3 landscape sheet */
+  sheet?: SheetSetup;
 }
 
 export interface DocMeta {

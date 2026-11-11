@@ -4,7 +4,10 @@ import { flushSync } from 'react-dom';
 import interUrl from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 import interItalicUrl from '@fontsource-variable/inter/files/inter-latin-wght-italic.woff2?url';
 import { DiagramLayer } from '../render/DiagramLayer';
-import { canvasThemes, type ThemeName } from '../render/theme';
+import { canvasThemes, type CanvasTheme, type ThemeName } from '../render/theme';
+import { SheetFrame, sheetInfos } from '../render/SheetFrame';
+import { effectiveSheet, frameMm, paperMm, tiles } from '../model/sheet';
+import type { Page } from '../model/types';
 import { currentPage, useStore } from '../store/store';
 import { nodeVisualRect } from '../model/geometry';
 import { downloadBlob, downloadText, unionRects } from '../model/util';
@@ -40,6 +43,19 @@ function renderSvgMarkup(el: React.ReactElement): string {
   return out;
 }
 
+/** the visible content of a page, canvas units (null when empty) */
+export function pageContentRect(page: Page) {
+  const s = useStore.getState();
+  const rects = page.order.map((id) => page.nodes[id]).filter((n) => n && !n.hidden).map((n) => nodeVisualRect(n, page, s.defs, s.doc.vlans));
+  return unionRects(rects);
+}
+
+/** a page's drawing as SVG markup (without the outer <svg>) */
+function renderPageInner(page: Page, theme: CanvasTheme) {
+  const s = useStore.getState();
+  return renderSvgMarkup(createElement(DiagramLayer, { page, defs: s.defs, vlans: s.doc.vlans, theme, linkColorByMedia: s.doc.linkColorByMedia, lineJumps: s.doc.lineJumps, hidePortLabels: s.doc.hidePortLabels, doc: s.doc, layers: s.doc.layers }));
+}
+
 export async function buildSvg(o: ExportOpts): Promise<{ svg: string; w: number; h: number }> {
   const s = useStore.getState();
   let page = (o.pageId && s.doc.pages.find((p) => p.id === o.pageId)) || currentPage();
@@ -52,11 +68,10 @@ export async function buildSvg(o: ExportOpts): Promise<{ svg: string; w: number;
     };
   }
   const theme = canvasThemes[o.theme];
-  const rects = page.order.map((id) => page.nodes[id]).filter((n) => n && !n.hidden).map((n) => nodeVisualRect(n, page, s.defs, s.doc.vlans));
-  const b = unionRects(rects) ?? { x: 0, y: 0, w: 100, h: 100 };
+  const b = pageContentRect(page) ?? { x: 0, y: 0, w: 100, h: 100 };
   const pad = o.padding;
   const vb = { x: Math.floor(b.x - pad), y: Math.floor(b.y - pad), w: Math.ceil(b.w + pad * 2), h: Math.ceil(b.h + pad * 2) };
-  const inner = renderSvgMarkup(createElement(DiagramLayer, { page, defs: s.defs, vlans: s.doc.vlans, theme, linkColorByMedia: s.doc.linkColorByMedia, lineJumps: s.doc.lineJumps, hidePortLabels: s.doc.hidePortLabels, doc: s.doc, layers: s.doc.layers }));
+  const inner = renderPageInner(page, theme);
   const css = await fontCss();
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${vb.w}" height="${vb.h}" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}">` +
@@ -147,37 +162,74 @@ export function exportCableScheduleCsv() {
   downloadText(`${safeName(s.doc.name)} - cable schedule.csv`, '﻿' + csv, 'text/csv');
 }
 
-/** Print / save as PDF: opens a print window with one landscape sheet per page. */
-export async function exportPdf(o: ExportOpts & { allPages?: boolean }) {
+export interface PrintSheet { cls: string; w: number; h: number; svg: string; number: number }
+
+/**
+ * Every drawing sheet of the chosen pages as SVG in millimetres: the page's drawing clipped to
+ * the frame at the sheet's scale, then the ISO 5457 frame and title block on top. Always the
+ * light drawing: paper is white, whatever theme the editor uses.
+ */
+export function buildPrintSheets(pages: Page[]): PrintSheet[] {
+  const s = useStore.getState();
+  const light = canvasThemes.light;
+  const out: PrintSheet[] = [];
+  for (const p of pages) {
+    const sheet = effectiveSheet(p, pageContentRect(p));
+    const infos = sheetInfos(s.doc, p, sheet);
+    const inner = renderPageInner(p, light);
+    const paper = paperMm(sheet), f = frameMm(sheet), k = sheet.unitsPerMm;
+    tiles(sheet).forEach((t, i) => {
+      const clip = `nc-sheet-${infos[i].number}`;
+      const frame = renderSvgMarkup(createElement(SheetFrame, { info: infos[i], theme: light }));
+      out.push({
+        cls: `s-${sheet.size.toLowerCase()}-${sheet.orientation}`,
+        w: paper.w, h: paper.h, number: infos[i].number,
+        svg:
+          `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${paper.w}mm" height="${paper.h}mm" viewBox="0 0 ${paper.w} ${paper.h}">` +
+          `<defs><clipPath id="${clip}"><rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}"/></clipPath></defs>` +
+          `<rect width="${paper.w}" height="${paper.h}" fill="#ffffff"/>` +
+          `<g clip-path="url(#${clip})"><g transform="translate(${f.x} ${f.y}) scale(${1 / k}) translate(${-t.frame.x} ${-t.frame.y})">${inner}</g></g>` +
+          frame +
+          `</svg>`,
+      });
+    });
+  }
+  return out;
+}
+
+/** Print / save as PDF: opens a print window with every drawing sheet at its own paper size. */
+export async function exportPdf(o: { allPages?: boolean }) {
   const s = useStore.getState();
   const pages = o.allPages ? s.doc.pages : [s.doc.pages.find((p) => p.id === s.pageId) ?? s.doc.pages[0]];
-  const svgs: { name: string; svg: string; w: number; h: number }[] = [];
-  for (const p of pages) {
-    // paper is white: always the light drawing, without a background fill
-    const r = await buildSvg({ ...o, theme: 'light', background: false, pageId: p.id, selectionOnly: false });
-    svgs.push({ name: p.name, ...r });
-  }
+  const sheets = buildPrintSheets(pages);
+  const css = await fontCss();
   const win = window.open('', '_blank');
   if (!win) { s.toast('Pop-up blocked: allow pop-ups for this page to print', 'error'); return; }
   const esc = (t: string) => t.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]!);
+  // one named @page per paper size, so mixed sizes print each on its own paper
+  const sizes = new Map(sheets.map((x) => [x.cls, x]));
+  const pageCss = [...sizes.values()].map((x) => `@page ${x.cls} { size: ${x.w}mm ${x.h}mm; margin: 0; }\n.sheet.${x.cls} { page: ${x.cls}; width: ${x.w}mm; height: ${x.h}mm; }`).join('\n');
+  const summary = [...sizes.values()].map((x) => x.cls.split('-').slice(1).map((w) => w[0].toUpperCase() + w.slice(1)).join(' ')).join(', ');
   win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(s.doc.name)}</title>
 <style>
-@page { size: ${svgs.some((x) => x.w >= x.h) ? 'landscape' : 'portrait'}; margin: 10mm; }
+${css}
+@page { margin: 0; }
+${pageCss}
 html, body { margin: 0; background: #fff; font-family: system-ui, sans-serif; }
-.sheet { page-break-after: always; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; padding: 6mm; }
-.sheet:last-child { page-break-after: auto; }
-.sheet h1 { font-size: 11pt; margin: 0 0 4mm; color: #333; font-weight: 600; }
-.sheet .art { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
-.sheet svg { max-width: 100%; max-height: 100%; width: auto; height: auto; }
-.bar { position: fixed; top: 8px; right: 8px; background: #1a8fd8; color: #fff; border: 0; padding: 8px 14px; border-radius: 6px; font: 600 13px system-ui; cursor: pointer; }
+.sheet { break-after: page; overflow: hidden; background: #fff; }
+.sheet:last-child { break-after: auto; }
+.sheet > svg { display: block; width: 100%; height: 100%; }
+.bar { position: sticky; top: 0; display: flex; gap: 12px; align-items: center; padding: 8px 16px; background: #1c2028; color: #fff; font: 13px system-ui; }
+.bar button { background: #1a8fd8; color: #fff; border: 0; padding: 7px 14px; border-radius: 6px; font: 600 13px system-ui; cursor: pointer; }
+@media screen { body { background: #d9dce1; } .sheet { margin: 16px auto; box-shadow: 0 1px 4px rgba(0, 0, 0, .25); } }
 @media print { .bar { display: none; } }
 </style></head><body>
-<button class="bar" type="button">Print / Save as PDF</button>
-${svgs.map((x) => `<section class="sheet"><h1>${esc(s.doc.name)}${pages.length > 1 ? ' — ' + esc(x.name) : ''}</h1><div class="art">${x.svg}</div></section>`).join('')}
+<div class="bar"><button type="button">Print / Save as PDF</button><span>${sheets.length} sheet${sheets.length === 1 ? '' : 's'} · ${esc(summary)}. Keep the print scale at 100 % so drawings stay true to scale.</span></div>
+${sheets.map((x) => `<section class="sheet ${x.cls}" data-sheet="${x.number}">${x.svg}</section>`).join('\n')}
 </body></html>`);
   win.document.close();
   // no inline script in the print window: the app's Content-Security-Policy applies to it too
-  win.document.querySelector('.bar')?.addEventListener('click', () => win.print());
+  win.document.querySelector('.bar button')?.addEventListener('click', () => win.print());
   setTimeout(() => win.print(), 400);
 }
 

@@ -12,6 +12,7 @@ import { ChoiceHost } from './ui/choice';
 import { canvasApi } from './canvas/api';
 import { newDocument, openFromFile, saveToFile } from './store/persistence';
 import { modKey } from './model/util';
+import { exportPdf } from './export/exporters';
 import type { Tool } from './model/types';
 
 const TOOL_KEYS: Record<string, Tool> = { v: 'select', h: 'hand', c: 'connect', z: 'zone', r: 'rect', t: 'text' };
@@ -46,6 +47,8 @@ function useShortcuts() {
       if (mod && k === 'g') { e.preventDefault(); s.group(); return; }
       if (mod && k === '\\') { e.preventDefault(); s.set({ hideUi: !s.hideUi }); return; }
       if (mod && k === 'e') { e.preventDefault(); s.set({ modal: 'export' }); return; }
+      // the browser's own print would print the editor; print the drawing sheets instead
+      if (mod && !e.shiftKey && k === 'p') { e.preventDefault(); void exportPdf({ allPages: true }); return; }
       if (mod && e.shiftKey && k === 'l') { e.preventDefault(); { const t = s.theme === 'dark' ? 'light' : 'dark'; s.set({ theme: t, themePref: t }); } return; }
       if (mod && (k === '=' || k === '+')) { e.preventDefault(); canvasApi.zoomBy(1.25); return; }
       if (mod && k === '-') { e.preventDefault(); canvasApi.zoomBy(0.8); return; }
