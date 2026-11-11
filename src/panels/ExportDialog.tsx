@@ -67,7 +67,9 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
           {isImage && (
             <>
               <Row label="Theme">
-                <Select value={theme} onChange={setTheme} options={[{ value: 'current', label: `Current (${s.theme})` }, { value: 'dark', label: 'Dark' }, { value: 'light', label: 'Light' }]} />
+                {format === 'pdf'
+                  ? <span className="hint">Printed in the light theme on white paper.</span>
+                  : <Select value={theme} onChange={setTheme} options={[{ value: 'current', label: `Current (${s.theme})` }, { value: 'dark', label: 'Dark' }, { value: 'light', label: 'Light' }]} />}
               </Row>
               {format === 'png' && <Row label="Scale"><Select value={String(scale)} onChange={(v) => setScale(Number(v))} options={[{ value: '1', label: '1× (screen)' }, { value: '2', label: '2× (default)' }, { value: '3', label: '3×' }, { value: '4', label: '4× (print)' }]} /></Row>}
               <Row label="Padding"><NumInput value={padding} min={0} max={400} precision={0} onChange={setPadding} suffix="px" /></Row>
