@@ -2,6 +2,7 @@ import { get, set, del } from 'idb-keyval';
 import { useStore, withEmbeddedDefs, buildDefMap, systemTheme } from './store';
 import type { DeviceDef, DiagramDoc, IconStyle } from '../model/types';
 import { newDoc } from '../model/factory';
+import { DocError, normalizeDef, normalizeDoc, tryNormalizeDoc } from '../model/validate';
 import { createSampleDoc } from '../library/sample';
 import { downloadText, pickFile, readFileText, stableStringify, uid } from '../model/util';
 
@@ -26,7 +27,7 @@ export async function initPersistence() {
     if (settings) useStore.setState(pick(settings, settingsKeys as unknown as string[]));
     const pref = useStore.getState().themePref;
     useStore.setState({ theme: pref === 'system' ? systemTheme() : pref });
-    if (Array.isArray(userDefs)) useStore.getState().setUserDefs(userDefs as DeviceDef[]);
+    if (Array.isArray(userDefs)) useStore.getState().setUserDefs(userDefs.map((d) => normalizeDef(d)).filter((d): d is DeviceDef => !!d));
     void index; // the start screen lists the saved diagrams; nothing is opened automatically
   } catch (e) {
     console.warn('Storage unavailable, running in memory only', e);
@@ -74,7 +75,13 @@ export async function listDocs(): Promise<DocMeta[]> {
 
 /** a stored diagram without opening it (start-screen thumbnails, downloads) */
 export async function readDoc(id: string): Promise<DiagramDoc | undefined> {
-  return (await get(K.doc(id))) as DiagramDoc | undefined;
+  // stored copies are checked too: a damaged entry must never take the start screen down with it
+  return tryNormalizeDoc(await get(K.doc(id))) ?? undefined;
+}
+
+/** the stored entry exactly as it is (for downloading a damaged diagram) */
+export async function readRawDoc(id: string): Promise<unknown> {
+  return get(K.doc(id));
 }
 
 export async function openDoc(id: string) {
@@ -82,6 +89,7 @@ export async function openDoc(id: string) {
   if (s.dirty) await saveDocNow(s.doc);
   const doc = await readDoc(id);
   if (doc) { importEmbeddedDefs(doc); s.loadDoc(doc); fileHandle = null; }
+  else s.toast('This diagram is damaged and cannot be opened. Use ⋯ › Download as file to keep a copy.', 'error');
 }
 
 /** back to the start screen (the current diagram is saved first) */
@@ -117,8 +125,10 @@ export async function renameDoc(id: string, name: string) {
 }
 
 export async function downloadDoc(id: string) {
-  const doc = await readDoc(id);
-  if (doc) downloadText(safeName(doc.name) + FILE_EXT, stableStringify(doc));
+  // the stored entry as it is, so a damaged diagram can still be rescued by hand
+  const raw = (await readDoc(id)) ?? (await readRawDoc(id));
+  const name = raw && typeof raw === 'object' && typeof (raw as any).name === 'string' ? (raw as any).name : 'damaged diagram';
+  if (raw) downloadText(safeName(name) + FILE_EXT, stableStringify(raw));
 }
 
 export async function newDocument(opts: { name?: string; iconStyle?: IconStyle } = {}) {
@@ -204,19 +214,25 @@ export async function openDroppedFile(f: File) {
 }
 
 async function openDocText(text: string) {
+  let parsed: unknown;
+  try { parsed = JSON.parse(text); } catch {
+    useStore.getState().toast('Could not open the file: it is not valid JSON (it may be truncated or not a Network Canvas diagram).', 'error');
+    return;
+  }
   try {
-    const doc = JSON.parse(text) as DiagramDoc;
-    // files written before the rename (format 'netcanvas') still open
-    if (doc.format !== 'networkcanvas' && (doc.format as string) !== 'netcanvas') throw new Error('Not a Network Canvas file');
-    doc.format = 'networkcanvas';
+    // files written before the rename (format 'netcanvas') still open; damaged files are repaired or refused
+    const { value: doc, warnings } = normalizeDoc(parsed);
     const s = useStore.getState();
     if (s.dirty) await saveDocNow(s.doc);
     importEmbeddedDefs(doc);
     s.loadDoc(doc);
     await saveDocNow(doc);
-    s.toast(`Opened ${doc.name}`, 'success');
+    if (warnings.length) {
+      console.warn('Network Canvas repaired the file:\n' + warnings.join('\n'));
+      s.toast(`Opened ${doc.name}, with ${warnings.length} problem${warnings.length > 1 ? 's' : ''} repaired: ${warnings[0]}${warnings.length > 1 ? ' …' : ''}`, 'info');
+    } else s.toast(`Opened ${doc.name}`, 'success');
   } catch (e: any) {
-    useStore.getState().toast('Could not open file: ' + (e?.message ?? e), 'error');
+    useStore.getState().toast(e instanceof DocError ? `Could not open the file: ${e.message}` : `Could not open the file: ${e?.message ?? e}`, 'error');
   }
 }
 
@@ -235,8 +251,9 @@ export async function importLibrary() {
   if (!f) return;
   try {
     const data = JSON.parse(await readFileText(f));
-    const defs: DeviceDef[] = data.format === 'networkcanvas-library' || data.format === 'netcanvas-library' ? data.defs : data.id && data.shapes ? [data] : [];
-    if (!defs.length) throw new Error('No devices found in file');
+    const raw: unknown[] = (data.format === 'networkcanvas-library' || data.format === 'netcanvas-library') && Array.isArray(data.defs) ? data.defs : data.id && data.shapes ? [data] : [];
+    const defs = raw.map((d) => normalizeDef(d)).filter((d): d is DeviceDef => !!d);
+    if (!defs.length) throw new Error('No usable devices found in the file');
     const s = useStore.getState();
     const ids = new Set(defs.map((d) => d.id));
     s.setUserDefs([...s.userDefs.filter((d) => !ids.has(d.id)), ...defs.map((d) => ({ ...d, builtin: false }))]);
