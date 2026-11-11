@@ -85,7 +85,7 @@ src/
   export/     SVG / PNG / PDF / interactive HTML / CSV
 ```
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the data model and design decisions, [docs/ICON_GUIDE.md](docs/ICON_GUIDE.md) to add icons, and [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) for how Network Canvas compares with Cisco's tools, draw.io, Visio, Lucidchart and NetBox.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the data model and design decisions, [docs/ICON_GUIDE.md](docs/ICON_GUIDE.md) to add icons, and [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) for how Network Canvas compares with Cisco's tools, draw.io, Visio, Lucidchart and NetBox. The [industrial-readiness review](docs/review/REPORT.md) lists what stands between it and use as a plant's official documentation, with the backlog in [GitHub issues](../../issues).
 
 ## File format
 

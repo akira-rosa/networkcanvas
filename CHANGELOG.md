@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+Industrial-readiness review (see `docs/review/REPORT.md`); fixes arrive in their own pull requests:
+
+- **Safer opening** (#56). Every diagram is checked and repaired as it comes in. Damaged files no longer crash the app or lock you out of the start screen, and files from a newer format version are refused with a clear message.
+- **Reliable CSV import** (#57). One separator per file, PT/ES Excel files (`;`, Windows-1252), and exact header names, so a column like “Equipment No.” can no longer overwrite IPs. A table maps type values to library devices, existing devices are updated across pages, and every skipped value is reported.
+- **No silent data loss** (#58). Two tabs, or an older file, can no longer overwrite newer work; you choose which version to keep. Failed saves show a banner with *Save to file*. Diagrams show whether a file copy exists, and there is a *Download all* button.
+- **Security** (#59). Imported SVG icons can no longer run script, and the app ships a strict Content-Security-Policy, so it makes no network requests.
+- **Exports** (#60). CSV cells that a spreadsheet would treat as formulas are neutralised, PDF always prints light, and large PNGs are reduced within browser limits with a message.
+- **Interaction** (#61). Ctrl+Shift+D and Ctrl+Shift+A do what the menu says, a library click always adds a device, and drill-down links work in the interactive viewer.
+- **Performance** (#62). Port usage is indexed: drawing links on large pages is about 4× faster, and checks on 1,000 devices are about 100× faster.
+- **Checks** (#63). A page without links is no longer reported as connected; invalid octets, network and broadcast addresses, and invalid subnets are errors.
+- **Review material.** Reference projects (`npm run fixtures`) and a fixture test.
 - **Start screen**: the app opens on a manager for the diagrams saved in this browser (previews, search, sort, rename, duplicate, download, delete, drag-and-drop a file to open) with *New topology* (name + icon style) and *Open the example*. The Smart4.0 sample is no longer opened automatically. The editor's house button / *File → All diagrams* return to it; the old *My diagrams* dialog is gone.
 - Library: devices added by clicking line up in free slots instead of piling up; clicking two different cards quickly adds both; the style filter follows the open diagram's icon style.
 - Renamed the project to **Network Canvas**: the build is `NetworkCanvas.html`, diagrams save as `.networkcanvas.json` (files saved under the old `.netcanvas.json` name still open), library packs use the `networkcanvas-library` format (old packs still import).

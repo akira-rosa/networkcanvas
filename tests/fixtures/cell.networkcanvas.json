@@ -1,0 +1,1686 @@
+{
+ "createdAt": 1767225600000,
+ "format": "networkcanvas",
+ "id": "cell-doc1",
+ "name": "Reference — Cell 3 (packaging)",
+ "pages": [
+  {
+   "id": "cell-pg4",
+   "links": {
+    "cell-l12": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C15",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ne",
+      "port": "p-p1"
+     },
+     "id": "cell-l12",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n10",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-l15": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n10",
+      "port": "p-x1-p2"
+     },
+     "id": "cell-l15",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n13",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-l18": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n13",
+      "port": "p-x1-p2"
+     },
+     "id": "cell-l18",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n16",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-l1b": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n16",
+      "port": "p-x1-p2"
+     },
+     "id": "cell-l1b",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n19",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-l1e": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n19",
+      "port": "p-x1-p2"
+     },
+     "id": "cell-l1e",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n1c",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-l1h": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n1c",
+      "port": "p-x1-p2"
+     },
+     "id": "cell-l1h",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n1f",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-l1k": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C21",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ng",
+      "port": "p-p1"
+     },
+     "id": "cell-l1k",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n1i",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-l1m": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n1i",
+      "port": "p-io1"
+     },
+     "id": "cell-l1m",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n1l",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l1o": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n1i",
+      "port": "p-io2"
+     },
+     "id": "cell-l1o",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n1n",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l1r": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C22",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ng",
+      "port": "p-p2"
+     },
+     "id": "cell-l1r",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n1p",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-l1t": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n1p",
+      "port": "p-io1"
+     },
+     "id": "cell-l1t",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n1s",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l1v": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n1p",
+      "port": "p-io2"
+     },
+     "id": "cell-l1v",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n1u",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l1y": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C23",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ng",
+      "port": "p-p3"
+     },
+     "id": "cell-l1y",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n1w",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-l20": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n1w",
+      "port": "p-io1"
+     },
+     "id": "cell-l20",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n1z",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l22": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n1w",
+      "port": "p-io2"
+     },
+     "id": "cell-l22",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n21",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l25": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C24",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ng",
+      "port": "p-p4"
+     },
+     "id": "cell-l25",
+     "media": "ethernet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n23",
+      "port": "p-x1"
+     },
+     "width": 1.6
+    },
+    "cell-l27": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n23",
+      "port": "p-io1"
+     },
+     "id": "cell-l27",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n26",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l29": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n23",
+      "port": "p-io2"
+     },
+     "id": "cell-l29",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n28",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l2b": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n23",
+      "port": "p-io3"
+     },
+     "id": "cell-l2b",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n2a",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l2d": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n23",
+      "port": "p-io4"
+     },
+     "id": "cell-l2d",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n2c",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l2g": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C25",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ng",
+      "port": "p-p5"
+     },
+     "id": "cell-l2g",
+     "media": "ethernet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n2e",
+      "port": "p-x1"
+     },
+     "width": 1.6
+    },
+    "cell-l2i": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n2e",
+      "port": "p-io1"
+     },
+     "id": "cell-l2i",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n2h",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l2k": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n2e",
+      "port": "p-io2"
+     },
+     "id": "cell-l2k",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n2j",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l2m": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n2e",
+      "port": "p-io3"
+     },
+     "id": "cell-l2m",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n2l",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l2o": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n2e",
+      "port": "p-io4"
+     },
+     "id": "cell-l2o",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n2n",
+      "port": "p-io"
+     },
+     "width": 1.6
+    },
+    "cell-l2r": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C26",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ni",
+      "port": "p-p1"
+     },
+     "id": "cell-l2r",
+     "media": "ethernet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n2p",
+      "port": "p-eth"
+     },
+     "width": 1.6
+    },
+    "cell-l2u": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C27",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ni",
+      "port": "p-p2"
+     },
+     "id": "cell-l2u",
+     "media": "ethernet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n2s",
+      "port": "p-eth"
+     },
+     "width": 1.6
+    },
+    "cell-l2w": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n2s",
+      "port": "p-tool"
+     },
+     "id": "cell-l2w",
+     "media": "iolink",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n2v",
+      "port": "p-i-o"
+     },
+     "width": 1.6
+    },
+    "cell-l2z": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C28",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ni",
+      "port": "p-p3"
+     },
+     "id": "cell-l2z",
+     "media": "ethernet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n2x",
+      "port": "p-eth"
+     },
+     "width": 1.6
+    },
+    "cell-l32": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C29",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ni",
+      "port": "p-p4"
+     },
+     "id": "cell-l32",
+     "media": "ethernet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n30",
+      "port": "p-poe"
+     },
+     "width": 1.6
+    },
+    "cell-l33": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n8",
+      "port": "p-p0-2"
+     },
+     "id": "cell-l33",
+     "media": "ethernet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "speed": "1G",
+     "to": {
+      "node": "cell-nc",
+      "port": "p-p5"
+     },
+     "width": 1.6
+    },
+    "cell-l36": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n8",
+      "port": "p-p0-3"
+     },
+     "id": "cell-l36",
+     "media": "ethernet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-n34",
+      "port": "p-eth"
+     },
+     "width": 1.6
+    },
+    "cell-la": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "dash": "solid",
+     "from": {
+      "node": "cell-n6",
+      "port": "p-lan"
+     },
+     "id": "cell-la",
+     "media": "ethernet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "speed": "1G",
+     "to": {
+      "node": "cell-n8",
+      "port": "p-p0-1"
+     },
+     "width": 1.6
+    },
+    "cell-lk": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-F1",
+     "dash": "solid",
+     "from": {
+      "node": "cell-nc",
+      "port": "p-sfp2"
+     },
+     "id": "cell-lk",
+     "media": "fiber",
+     "routing": "straight",
+     "showPortLabels": true,
+     "speed": "1G",
+     "to": {
+      "node": "cell-ne",
+      "port": "p-sfp1"
+     },
+     "width": 1.6
+    },
+    "cell-ll": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-F2",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ne",
+      "port": "p-sfp2"
+     },
+     "id": "cell-ll",
+     "media": "fiber",
+     "routing": "straight",
+     "showPortLabels": true,
+     "speed": "1G",
+     "to": {
+      "node": "cell-ng",
+      "port": "p-sfp1"
+     },
+     "width": 1.6
+    },
+    "cell-lm": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-F3",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ng",
+      "port": "p-sfp2"
+     },
+     "id": "cell-lm",
+     "media": "fiber",
+     "routing": "straight",
+     "showPortLabels": true,
+     "speed": "1G",
+     "to": {
+      "node": "cell-ni",
+      "port": "p-sfp1"
+     },
+     "width": 1.6
+    },
+    "cell-ln": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-F4",
+     "dash": "solid",
+     "from": {
+      "node": "cell-ni",
+      "port": "p-sfp2"
+     },
+     "id": "cell-ln",
+     "media": "fiber",
+     "routing": "straight",
+     "showPortLabels": true,
+     "speed": "1G",
+     "to": {
+      "node": "cell-nc",
+      "port": "p-sfp1"
+     },
+     "width": 1.6
+    },
+    "cell-lq": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C11",
+     "dash": "solid",
+     "from": {
+      "node": "cell-nc",
+      "port": "p-p1"
+     },
+     "id": "cell-lq",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-no",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-lt": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C12",
+     "dash": "solid",
+     "from": {
+      "node": "cell-nc",
+      "port": "p-p2"
+     },
+     "id": "cell-lt",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-nr",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-lw": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C13",
+     "dash": "solid",
+     "from": {
+      "node": "cell-nc",
+      "port": "p-p3"
+     },
+     "id": "cell-lw",
+     "media": "profinet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-nu",
+      "port": "p-x1-p1"
+     },
+     "width": 1.6
+    },
+    "cell-lz": {
+     "arrowEnd": true,
+     "arrowStart": false,
+     "cableId": "L3-C14",
+     "dash": "solid",
+     "from": {
+      "node": "cell-nc",
+      "port": "p-p4"
+     },
+     "id": "cell-lz",
+     "media": "ethernet",
+     "routing": "straight",
+     "showPortLabels": true,
+     "to": {
+      "node": "cell-nx",
+      "port": "p-eth0"
+     },
+     "width": 1.6
+    }
+   },
+   "name": "Cell 3",
+   "nodes": {
+    "cell-n10": {
+     "addresses": [
+      {
+       "id": "cell-a11",
+       "value": "10.3.10.14",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "vfd",
+     "h": 75,
+     "id": "cell-n10",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-VFD1",
+     "props": {
+      "firmware": "V4.5",
+      "location": "L3-CAB1",
+      "model": "G120",
+      "serial": "SN594485"
+     },
+     "w": 40,
+     "x": 400,
+     "y": 213
+    },
+    "cell-n13": {
+     "addresses": [
+      {
+       "id": "cell-a14",
+       "value": "10.3.10.15",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "vfd",
+     "h": 75,
+     "id": "cell-n13",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-VFD2",
+     "props": {
+      "firmware": "V3.2",
+      "location": "L3-CAB1",
+      "model": "G120",
+      "serial": "SN491538"
+     },
+     "w": 40,
+     "x": 510,
+     "y": 213
+    },
+    "cell-n16": {
+     "addresses": [
+      {
+       "id": "cell-a17",
+       "value": "10.3.10.16",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "vfd",
+     "h": 75,
+     "id": "cell-n16",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-VFD3",
+     "props": {
+      "firmware": "V4.3",
+      "location": "L3-CAB1",
+      "model": "G120",
+      "serial": "SN499457"
+     },
+     "w": 40,
+     "x": 620,
+     "y": 213
+    },
+    "cell-n19": {
+     "addresses": [
+      {
+       "id": "cell-a1a",
+       "value": "10.3.10.17",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "vfd",
+     "h": 75,
+     "id": "cell-n19",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-VFD4",
+     "props": {
+      "firmware": "V1.4",
+      "location": "L3-CAB1",
+      "model": "G120",
+      "serial": "SN507376"
+     },
+     "w": 40,
+     "x": 400,
+     "y": 333
+    },
+    "cell-n1c": {
+     "addresses": [
+      {
+       "id": "cell-a1d",
+       "value": "10.3.10.18",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "vfd",
+     "h": 75,
+     "id": "cell-n1c",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-VFD5",
+     "props": {
+      "firmware": "V2.5",
+      "location": "L3-CAB1",
+      "model": "G120",
+      "serial": "SN515295"
+     },
+     "w": 40,
+     "x": 510,
+     "y": 333
+    },
+    "cell-n1f": {
+     "addresses": [
+      {
+       "id": "cell-a1g",
+       "value": "10.3.10.19",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "vfd",
+     "h": 75,
+     "id": "cell-n1f",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-VFD6",
+     "props": {
+      "firmware": "V3.6",
+      "location": "L3-CAB1",
+      "model": "G120",
+      "serial": "SN523214"
+     },
+     "w": 40,
+     "x": 620,
+     "y": 333
+    },
+    "cell-n1i": {
+     "addresses": [
+      {
+       "id": "cell-a1j",
+       "value": "10.3.10.20",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "remote-io",
+     "h": 55,
+     "id": "cell-n1i",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-RIO1",
+     "props": {
+      "firmware": "V2.1",
+      "location": "L3-CAB1",
+      "model": "ET200SP",
+      "serial": "SN641999"
+     },
+     "w": 52.5,
+     "x": 774,
+     "y": 223
+    },
+    "cell-n1l": {
+     "addresses": [],
+     "defId": "sensor",
+     "h": 47.5,
+     "id": "cell-n1l",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-B1",
+     "props": {},
+     "w": 67.5,
+     "x": 760,
+     "y": 309
+    },
+    "cell-n1n": {
+     "addresses": [],
+     "defId": "actuator",
+     "h": 40,
+     "id": "cell-n1n",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-Y2",
+     "props": {},
+     "w": 67.5,
+     "x": 810,
+     "y": 313
+    },
+    "cell-n1p": {
+     "addresses": [
+      {
+       "id": "cell-a1q",
+       "value": "10.3.10.21",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "remote-io",
+     "h": 55,
+     "id": "cell-n1p",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-RIO2",
+     "props": {
+      "firmware": "V3.2",
+      "location": "L3-CAB1",
+      "model": "ET200SP",
+      "serial": "SN649918"
+     },
+     "w": 52.5,
+     "x": 884,
+     "y": 223
+    },
+    "cell-n1s": {
+     "addresses": [],
+     "defId": "sensor",
+     "h": 47.5,
+     "id": "cell-n1s",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-B3",
+     "props": {},
+     "w": 67.5,
+     "x": 870,
+     "y": 309
+    },
+    "cell-n1u": {
+     "addresses": [],
+     "defId": "actuator",
+     "h": 40,
+     "id": "cell-n1u",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-Y4",
+     "props": {},
+     "w": 67.5,
+     "x": 920,
+     "y": 313
+    },
+    "cell-n1w": {
+     "addresses": [
+      {
+       "id": "cell-a1x",
+       "value": "10.3.10.22",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "remote-io",
+     "h": 55,
+     "id": "cell-n1w",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-RIO3",
+     "props": {
+      "firmware": "V4.3",
+      "location": "L3-CAB1",
+      "model": "ET200SP",
+      "serial": "SN657837"
+     },
+     "w": 52.5,
+     "x": 774,
+     "y": 473
+    },
+    "cell-n1z": {
+     "addresses": [],
+     "defId": "sensor",
+     "h": 47.5,
+     "id": "cell-n1z",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-B5",
+     "props": {},
+     "w": 67.5,
+     "x": 760,
+     "y": 559
+    },
+    "cell-n21": {
+     "addresses": [],
+     "defId": "actuator",
+     "h": 40,
+     "id": "cell-n21",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-Y6",
+     "props": {},
+     "w": 67.5,
+     "x": 810,
+     "y": 563
+    },
+    "cell-n23": {
+     "addresses": [
+      {
+       "id": "cell-a24",
+       "value": "10.3.10.23",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "iolink",
+     "h": 47.5,
+     "id": "cell-n23",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-IOL1",
+     "props": {
+      "firmware": "V1.4",
+      "location": "L3-CAB1",
+      "model": "iolink",
+      "serial": "SN665756"
+     },
+     "w": 47.5,
+     "x": 886,
+     "y": 476
+    },
+    "cell-n26": {
+     "addresses": [],
+     "defId": "sensor",
+     "h": 47.5,
+     "id": "cell-n26",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-IOL1-1",
+     "props": {},
+     "w": 67.5,
+     "x": 812,
+     "y": 562
+    },
+    "cell-n28": {
+     "addresses": [],
+     "defId": "actuator",
+     "h": 40,
+     "id": "cell-n28",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-IOL1-2",
+     "props": {},
+     "w": 67.5,
+     "x": 857,
+     "y": 566
+    },
+    "cell-n2a": {
+     "addresses": [],
+     "defId": "sensor",
+     "h": 47.5,
+     "id": "cell-n2a",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-IOL1-3",
+     "props": {},
+     "w": 67.5,
+     "x": 902,
+     "y": 562
+    },
+    "cell-n2c": {
+     "addresses": [],
+     "defId": "actuator",
+     "h": 40,
+     "id": "cell-n2c",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-IOL1-4",
+     "props": {},
+     "w": 67.5,
+     "x": 947,
+     "y": 566
+    },
+    "cell-n2e": {
+     "addresses": [
+      {
+       "id": "cell-a2f",
+       "value": "10.3.10.24",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "iolink",
+     "h": 47.5,
+     "id": "cell-n2e",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-IOL2",
+     "props": {
+      "firmware": "V2.5",
+      "location": "L3-CAB1",
+      "model": "iolink",
+      "serial": "SN673675"
+     },
+     "w": 47.5,
+     "x": 996,
+     "y": 476
+    },
+    "cell-n2h": {
+     "addresses": [],
+     "defId": "sensor",
+     "h": 47.5,
+     "id": "cell-n2h",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-IOL2-1",
+     "props": {},
+     "w": 67.5,
+     "x": 922,
+     "y": 562
+    },
+    "cell-n2j": {
+     "addresses": [],
+     "defId": "actuator",
+     "h": 40,
+     "id": "cell-n2j",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-IOL2-2",
+     "props": {},
+     "w": 67.5,
+     "x": 967,
+     "y": 566
+    },
+    "cell-n2l": {
+     "addresses": [],
+     "defId": "sensor",
+     "h": 47.5,
+     "id": "cell-n2l",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-IOL2-3",
+     "props": {},
+     "w": 67.5,
+     "x": 1012,
+     "y": 562
+    },
+    "cell-n2n": {
+     "addresses": [],
+     "defId": "actuator",
+     "h": 40,
+     "id": "cell-n2n",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-IOL2-4",
+     "props": {},
+     "w": 67.5,
+     "x": 1057,
+     "y": 566
+    },
+    "cell-n2p": {
+     "addresses": [
+      {
+       "id": "cell-a2q",
+       "value": "10.3.10.25",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "vision",
+     "h": 45,
+     "id": "cell-n2p",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-VIS",
+     "props": {
+      "firmware": "V3.6",
+      "location": "L3-CAB1",
+      "model": "vision",
+      "serial": "SN681594"
+     },
+     "w": 52.5,
+     "x": 1154,
+     "y": 228
+    },
+    "cell-n2s": {
+     "addresses": [
+      {
+       "id": "cell-a2t",
+       "value": "10.3.10.26",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "robot-arm",
+     "h": 72.5,
+     "id": "cell-n2s",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-ROB",
+     "props": {
+      "firmware": "V4.7",
+      "location": "L3-CAB1",
+      "model": "robot-arm",
+      "serial": "SN689513"
+     },
+     "w": 65,
+     "x": 1258,
+     "y": 214
+    },
+    "cell-n2v": {
+     "addresses": [],
+     "defId": "gripper",
+     "h": 60,
+     "id": "cell-n2v",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-GRP",
+     "props": {},
+     "w": 42.5,
+     "x": 1267,
+     "y": 294
+    },
+    "cell-n2x": {
+     "addresses": [
+      {
+       "id": "cell-a2y",
+       "value": "10.3.10.27",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "barcode-scanner",
+     "h": 37.5,
+     "id": "cell-n2x",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-SCN",
+     "props": {
+      "firmware": "V1.8",
+      "location": "L3-CAB1",
+      "model": "barcode-scanner",
+      "serial": "SN697432"
+     },
+     "w": 52.5,
+     "x": 1374,
+     "y": 231
+    },
+    "cell-n30": {
+     "addresses": [
+      {
+       "id": "cell-a31",
+       "value": "10.3.10.28",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "ip-camera",
+     "h": 47.5,
+     "id": "cell-n30",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-CAM",
+     "props": {
+      "firmware": "V2.9",
+      "location": "L3-CAB1",
+      "model": "ip-camera",
+      "serial": "SN705351"
+     },
+     "w": 70,
+     "x": 1145,
+     "y": 346
+    },
+    "cell-n34": {
+     "addresses": [
+      {
+       "id": "cell-a35",
+       "value": "10.3.99.10",
+       "vlan": "cell-v3"
+      }
+     ],
+     "defId": "ups",
+     "h": 70,
+     "id": "cell-n34",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "C3-UPS",
+     "props": {
+      "firmware": "V4.3",
+      "location": "C3-CAB1",
+      "model": "SITOP UPS1600",
+      "serial": "SN123757"
+     },
+     "w": 42.5,
+     "x": 699,
+     "y": -95
+    },
+    "cell-n5": {
+     "h": 760,
+     "id": "cell-n5",
+     "kind": "zone",
+     "radius": 6,
+     "title": "Cell 3",
+     "titleAlign": "right",
+     "vlan": "cell-v2",
+     "w": 1700,
+     "x": -80,
+     "y": -140
+    },
+    "cell-n6": {
+     "addresses": [
+      {
+       "id": "cell-a7",
+       "value": "10.3.99.1",
+       "vlan": "cell-v3"
+      }
+     ],
+     "defId": "firewall",
+     "h": 75,
+     "id": "cell-n6",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "C3-FW",
+     "props": {
+      "firmware": "V2.1",
+      "location": "C3-CAB1",
+      "model": "SCALANCE S615",
+      "serial": "SN107919"
+     },
+     "w": 47.5,
+     "x": 96,
+     "y": -97
+    },
+    "cell-n8": {
+     "addresses": [
+      {
+       "id": "cell-a9",
+       "value": "10.3.99.2",
+       "vlan": "cell-v3"
+      }
+     ],
+     "defId": "switch-l3",
+     "h": 42.5,
+     "id": "cell-n8",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "C3-SW0",
+     "props": {
+      "firmware": "V3.2",
+      "location": "C3-CAB1",
+      "model": "SCALANCE XC216",
+      "serial": "SN115838"
+     },
+     "w": 80,
+     "x": 380,
+     "y": -81
+    },
+    "cell-nb": {
+     "h": 720,
+     "id": "cell-nb",
+     "kind": "zone",
+     "radius": 6,
+     "title": "Line 3",
+     "titleAlign": "right",
+     "vlan": "cell-v2",
+     "w": 1520,
+     "x": -40,
+     "y": 40
+    },
+    "cell-nc": {
+     "addresses": [
+      {
+       "id": "cell-ad",
+       "value": "10.3.10.2",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "switch",
+     "h": 42.5,
+     "id": "cell-nc",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-SW1",
+     "props": {
+      "firmware": "V3.0",
+      "location": "L3-CAB1",
+      "model": "SCALANCE XC208",
+      "serial": "SN337570"
+     },
+     "w": 80,
+     "x": 80,
+     "y": 79
+    },
+    "cell-ne": {
+     "addresses": [
+      {
+       "id": "cell-af",
+       "value": "10.3.10.3",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "switch",
+     "h": 42.5,
+     "id": "cell-ne",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-SW2",
+     "props": {
+      "firmware": "V4.1",
+      "location": "L3-CAB1",
+      "model": "SCALANCE XC208",
+      "serial": "SN345489"
+     },
+     "w": 80,
+     "x": 460,
+     "y": 79
+    },
+    "cell-ng": {
+     "addresses": [
+      {
+       "id": "cell-ah",
+       "value": "10.3.10.4",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "switch",
+     "h": 42.5,
+     "id": "cell-ng",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-SW3",
+     "props": {
+      "firmware": "V1.2",
+      "location": "L3-CAB1",
+      "model": "SCALANCE XC208",
+      "serial": "SN353408"
+     },
+     "w": 80,
+     "x": 840,
+     "y": 79
+    },
+    "cell-ni": {
+     "addresses": [
+      {
+       "id": "cell-aj",
+       "value": "10.3.10.5",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "switch",
+     "h": 42.5,
+     "id": "cell-ni",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-SW4",
+     "props": {
+      "firmware": "V2.3",
+      "location": "L3-CAB1",
+      "model": "SCALANCE XC208",
+      "serial": "SN361327"
+     },
+     "w": 80,
+     "x": 1220,
+     "y": 79
+    },
+    "cell-no": {
+     "addresses": [
+      {
+       "id": "cell-ap",
+       "value": "10.3.10.10",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "plc-modular",
+     "h": 67.5,
+     "id": "cell-no",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-PLC",
+     "props": {
+      "firmware": "V4.1",
+      "location": "L3-CAB1",
+      "model": "S7-1516",
+      "serial": "SN562809"
+     },
+     "w": 55,
+     "x": 13,
+     "y": 216
+    },
+    "cell-nr": {
+     "addresses": [
+      {
+       "id": "cell-as",
+       "value": "10.3.10.11",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "safety-plc",
+     "h": 65,
+     "id": "cell-nr",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-FPLC",
+     "props": {
+      "firmware": "V1.2",
+      "location": "L3-CAB1",
+      "model": "S7-1516F",
+      "serial": "SN570728"
+     },
+     "w": 57.5,
+     "x": 121,
+     "y": 218
+    },
+    "cell-nu": {
+     "addresses": [
+      {
+       "id": "cell-av",
+       "value": "10.3.10.12",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "hmi",
+     "h": 55,
+     "id": "cell-nu",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-HMI",
+     "props": {
+      "firmware": "V2.3",
+      "location": "L3-CAB1",
+      "model": "TP1500",
+      "serial": "SN578647"
+     },
+     "w": 77.5,
+     "x": 221,
+     "y": 223
+    },
+    "cell-nx": {
+     "addresses": [
+      {
+       "id": "cell-ay",
+       "value": "10.3.10.13",
+       "vlan": "cell-v2"
+      }
+     ],
+     "defId": "industrial-pc",
+     "h": 52.5,
+     "id": "cell-nx",
+     "kind": "device",
+     "labelPos": "bottom",
+     "name": "L3-IPC",
+     "props": {
+      "firmware": "V3.4",
+      "location": "L3-CAB1",
+      "model": "industrial-pc",
+      "serial": "SN586566"
+     },
+     "w": 67.5,
+     "x": 6,
+     "y": 344
+    }
+   },
+   "order": [
+    "cell-nb",
+    "cell-n5",
+    "cell-n6",
+    "cell-n8",
+    "cell-nc",
+    "cell-ne",
+    "cell-ng",
+    "cell-ni",
+    "cell-no",
+    "cell-nr",
+    "cell-nu",
+    "cell-nx",
+    "cell-n10",
+    "cell-n13",
+    "cell-n16",
+    "cell-n19",
+    "cell-n1c",
+    "cell-n1f",
+    "cell-n1i",
+    "cell-n1l",
+    "cell-n1n",
+    "cell-n1p",
+    "cell-n1s",
+    "cell-n1u",
+    "cell-n1w",
+    "cell-n1z",
+    "cell-n21",
+    "cell-n23",
+    "cell-n26",
+    "cell-n28",
+    "cell-n2a",
+    "cell-n2c",
+    "cell-n2e",
+    "cell-n2h",
+    "cell-n2j",
+    "cell-n2l",
+    "cell-n2n",
+    "cell-n2p",
+    "cell-n2s",
+    "cell-n2v",
+    "cell-n2x",
+    "cell-n30",
+    "cell-n34"
+   ]
+  }
+ ],
+ "updatedAt": 1767225600000,
+ "version": 1,
+ "vlans": [
+  {
+   "color": "#d6409f",
+   "description": "Production cell 3",
+   "id": "cell-v2",
+   "name": "Cell 3",
+   "subnet": "10.3.10.0/24",
+   "vlanId": 10
+  },
+  {
+   "color": "#8b95a5",
+   "description": "Switch and firewall management",
+   "id": "cell-v3",
+   "name": "Management",
+   "subnet": "10.3.99.0/24",
+   "vlanId": 99
+  }
+ ]
+}
