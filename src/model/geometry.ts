@@ -49,12 +49,30 @@ export function linkMediaFor(a?: PortMedia, b?: PortMedia): LinkMedia {
   }
 }
 
+// Port usage is asked for every port of every visible device on each render, by the checks and by
+// link drawing; scanning all links each time made big pages quadratic. The count per "node|port" is
+// computed once per links object (immer keeps its identity while only nodes change).
+const usageIndex = new WeakMap<Page['links'], Map<string, number>>();
+
+function portUsageIndex(links: Page['links']): Map<string, number> {
+  let idx = usageIndex.get(links);
+  if (!idx) {
+    idx = new Map();
+    for (const l of Object.values(links)) {
+      if (l.from.port) { const k = l.from.node + '|' + l.from.port; idx.set(k, (idx.get(k) ?? 0) + 1); }
+      if (l.to.port) { const k = l.to.node + '|' + l.to.port; idx.set(k, (idx.get(k) ?? 0) + 1); }
+    }
+    usageIndex.set(links, idx);
+  }
+  return idx;
+}
+
 export function portUsage(page: Page, nodeId: string, portId: string, exceptLink?: string) {
-  let n = 0;
-  for (const l of Object.values(page.links)) {
-    if (l.id === exceptLink) continue;
-    if (l.from.node === nodeId && l.from.port === portId) n++;
-    if (l.to.node === nodeId && l.to.port === portId) n++;
+  let n = portUsageIndex(page.links).get(nodeId + '|' + portId) ?? 0;
+  const ex = exceptLink ? page.links[exceptLink] : undefined;
+  if (ex) {
+    if (ex.from.node === nodeId && ex.from.port === portId) n--;
+    if (ex.to.node === nodeId && ex.to.port === portId) n--;
   }
   return n;
 }
