@@ -7,6 +7,8 @@ import { Canvas, isTyping } from './canvas/Canvas';
 import { Modals } from './panels/Modals';
 import { DeviceEditor } from './editor/DeviceEditor';
 import { Home } from './home/Home';
+import { SaveBanner } from './ui/SaveBanner';
+import { ChoiceHost } from './ui/choice';
 import { canvasApi } from './canvas/api';
 import { newDocument, openFromFile, saveToFile } from './store/persistence';
 import { modKey } from './model/util';
@@ -98,10 +100,11 @@ export function App() {
     return () => mq.removeEventListener('change', on);
   }, []);
   void currentPage;
-  if (home) return <><Home /><Toasts /></>;
+  if (home) return <><div className="app"><SaveBanner /><Home /></div><ChoiceHost /><Toasts /></>;
   return (
     <div className="app">
       <TopBar />
+      <SaveBanner />
       <div className="workspace">
         {!hideUi && <LeftPanel />}
         <main className="canvas-area"><Canvas /></main>
@@ -109,6 +112,7 @@ export function App() {
       </div>
       <Modals />
       {editor && <DeviceEditor />}
+      <ChoiceHost />
       <Toasts />
     </div>
   );

@@ -16,6 +16,7 @@ import { ContextMenu, type MenuItem } from '../ui/ContextMenu';
 import { IconButton, Modal } from '../ui/controls';
 import { modKey } from '../model/util';
 import { ErrorBoundary } from '../ErrorBoundary';
+import '../ui/banner.css';
 
 /** Start screen: the diagrams stored in this browser, plus ways to start a new one. */
 export function Home() {
@@ -57,7 +58,7 @@ export function Home() {
         { label: 'Open', action: () => openDoc(d.id) },
         { label: 'Rename', action: () => setRenaming(d.id) },
         { label: 'Duplicate', action: async () => { await duplicateDoc(d.id); refresh(); } },
-        { label: 'Download as file', action: () => downloadDoc(d.id) },
+        { label: 'Download as file', action: async () => { await downloadDoc(d.id); refresh(); } },
         { sep: true },
         { label: 'Delete…', danger: true, action: async () => {
           if (!confirm(`Delete “${d.name}” from this browser? This cannot be undone.`)) return;
@@ -114,7 +115,13 @@ export function Home() {
 
         <section className="home-docs" aria-label="Your diagrams">
           <div className="home-docs-head">
-            <h2>Your diagrams{docs && docs.length ? <span className="home-count">{docs.length}</span> : null}</h2>
+            <div className="home-docs-title">
+              <h2>Your diagrams{docs && docs.length ? <span className="home-count">{docs.length}</span> : null}</h2>
+              {!!docs?.length && (
+                <button className="btn ghost sm" title="Download every diagram as a .networkcanvas.json file (keep them with your project files)"
+                  onClick={async () => { for (const d of docs) { await downloadDoc(d.id); await new Promise((r) => setTimeout(r, 250)); } refresh(); }}>Download all</button>
+              )}
+            </div>
             {!!docs?.length && (
               <div className="home-docs-tools">
                 <label className="home-search">
@@ -152,6 +159,9 @@ export function Home() {
                       )}
                       <div className="doc-card-meta">Edited {ago(d.updatedAt)}</div>
                       <div className="doc-card-meta">{plural(d.pages, 'page')}, {plural(d.devices, 'device')}</div>
+                      {d.fileSavedAt
+                        ? <div className="doc-card-meta" title={d.fileName}>Saved to a file {ago(d.fileSavedAt)}</div>
+                        : <div className="doc-card-meta nofile" title="Only in this browser. Use ⋯ › Download as file to keep a copy.">No file copy</div>}
                     </div>
                     <button className="icon-btn sm" title="More" onClick={(e) => cardMenu(e, d)}><MoreHorizontal size={16} /></button>
                   </div>

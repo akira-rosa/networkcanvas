@@ -99,6 +99,18 @@ await page.click('button[title="All diagrams"]'); await page.waitForTimeout(400)
 await page.keyboard.press('n'); await page.fill('#new-topo-name', 'E2E new'); await page.click('button:has-text("Create topology")'); await page.waitForTimeout(400);
 check('new topology from the start screen', (await page.inputValue('.doc-name input')) === 'E2E new' && (await page.$$('.canvas-area [data-id]')).length === 0);
 
+// the same diagram in two tabs: the second is warned, and a stale save is refused instead of overwriting
+{
+  const t2 = await ctx.newPage(); t2.on('dialog', (d) => d.accept());
+  await t2.goto(url); await t2.waitForSelector('.home');
+  await t2.click('.doc-card:has-text("E2E new") .doc-card-open'); await t2.waitForSelector('.canvas-area'); await t2.waitForTimeout(400);
+  check('second tab is warned the diagram is open elsewhere', /open in another tab/.test(await t2.$eval('.banner', (e) => e.textContent).catch(() => '')));
+  await page.fill('.doc-name input', 'E2E edited in tab 1'); await page.keyboard.press('Enter'); await page.waitForTimeout(900);
+  await t2.fill('.doc-name input', 'E2E edited in tab 2'); await t2.keyboard.press('Enter'); await t2.waitForTimeout(900);
+  check('a stale tab cannot overwrite newer work', /not saved/i.test(await t2.$eval('.banner', (e) => e.textContent).catch(() => '')));
+  await t2.close();
+}
+
 // the page must survive a host that injects a script before the app (chat preview panes do this)
 const injected = (await (await import('node:fs/promises')).readFile(file, 'utf8')).replace(/<head[^>]*>/, (m) => m + '<script>window.__x=1</script>');
 const injPath = join(tmp, 'injected.html'); writeFileSync(injPath, injected);

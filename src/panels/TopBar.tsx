@@ -6,6 +6,7 @@ import {
 import { useStore } from '../store/store';
 import { IconButton, TextInput } from '../ui/controls';
 import { ContextMenu, type MenuItem } from '../ui/ContextMenu';
+import '../ui/banner.css';
 import { canvasApi } from '../canvas/api';
 import { newDocument, openFromFile, saveToFile, loadSample, importLibrary, goHome } from '../store/persistence';
 import { exportCableScheduleCsv, exportInventoryCsv, exportPdf, exportPng, exportSvg } from '../export/exporters';
@@ -132,7 +133,11 @@ export function TopBar() {
         <button className="menu-btn" onClick={(e) => openMenu(e, insertMenu)}>Insert</button>
         <div className="doc-name">
           <TextInput value={s.doc.name} onChange={(v) => s.change((d) => { d.name = v || 'Untitled'; })} />
-          <span className={'save-dot ' + (s.dirty ? 'dirty' : 'saved')} title={s.dirty ? 'Saving…' : 'Saved in this browser'} />
+          <span className={'save-dot ' + (s.saveError || s.saveConflict ? 'dirty' : s.dirty ? 'dirty' : 'saved')}
+            title={s.saveError || s.saveConflict ? 'Not saved — see the message at the top' : s.dirty ? 'Saving…' : `Saved in this browser${s.fileSavedAt ? ` · last saved to a file ${new Date(s.fileSavedAt).toLocaleString()}` : ''}`} />
+          {!s.fileSavedAt && (
+            <button className="file-chip" title="This diagram exists only in this browser. Browsers can clear stored data; keep a file copy (Ctrl+S)." onClick={() => saveToFile()}>No file copy</button>
+          )}
         </div>
       </div>
 
