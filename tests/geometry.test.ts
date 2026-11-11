@@ -78,6 +78,26 @@ describe('checks', () => {
     expect(issues.some((i) => i.code === 'name-dup')).toBe(true);
     expect(issues.some((i) => i.code === 'ip-dup')).toBe(true);
   });
+  it('does not call a page connected when it has no links, and rejects impossible addresses', () => {
+    const doc = createSampleDoc();
+    const pg = doc.pages[0];
+    pg.links = {};
+    const devs = Object.values(pg.nodes).filter((n) => n.kind === 'device') as any[];
+    const v = doc.vlans.find((x) => x.subnet === '192.168.50.0/24')!;
+    devs[0].addresses = [{ id: 'a1', vlan: v.id, value: '192.168.50.300' }];
+    devs[1].addresses = [{ id: 'a2', vlan: v.id, value: '192.168.50.0' }];
+    devs[2].addresses = [{ id: 'a3', vlan: v.id, value: '192.168.50.255' }];
+    v.subnet = '192.168.50.0/24';
+    const issues = runChecks(doc, styledDefMap(buildDefMap([]), 'iso'));
+    expect(issues.some((i) => i.code === 'unconnected' && /No links/.test(i.message))).toBe(true);
+    expect(issues.filter((i) => i.code === 'ip-format' && i.severity === 'error').length).toBe(1);
+    expect(issues.filter((i) => i.code === 'ip-reserved').map((i) => /network|broadcast/.exec(i.message)?.[0])).toEqual(['network', 'broadcast']);
+  });
+  it('treats an invalid VLAN subnet as an error', () => {
+    const doc = createSampleDoc();
+    doc.vlans[0].subnet = '192.168.250.0/33';
+    expect(runChecks(doc, styledDefMap(buildDefMap([]), 'iso')).some((i) => i.code === 'vlan-subnet' && i.severity === 'error')).toBe(true);
+  });
   it('the bundled sample is clean (no errors or warnings)', () => {
     const issues = runChecks(createSampleDoc(), styledDefMap(buildDefMap([]), 'iso'));
     expect(issues.filter((i) => i.severity !== 'info').map((i) => i.message)).toEqual([]);

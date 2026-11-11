@@ -539,7 +539,7 @@ function ChecksSection() {
         <span style={{ color: SEV_COLOR.warning }}>● {counts.warning} warnings</span>
         <span style={{ color: SEV_COLOR.info }}>● {counts.info} info</span>
       </div>
-      {!shown.length && <div className="hint">No problems found: IPs are unique and inside their VLANs, ports are within capacity, every device is connected.</div>}
+      {!shown.length && <div className="hint">{counts.error + counts.warning === 0 ? 'No errors or warnings.' : 'Nothing to show with the current filter.'}{counts.info && !showInfo ? ` ${counts.info} info item${counts.info > 1 ? 's' : ''} hidden (Show info).` : ''}</div>}
       <div className="check-list">
         {shown.slice(0, 60).map((i) => (
           <button key={i.id} className="check-item" onClick={() => go(i)} title={i.code}>
