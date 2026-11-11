@@ -40,10 +40,50 @@ function toPathD(el: Element): string | null {
   return null;
 }
 
+/* ---------- sanitising ---------- */
+
+// Vendor icons come from the internet. The SVG is mounted in the page to measure it, so everything
+// that could run script, fetch something or navigate is removed first; only drawing is kept.
+const ALLOWED = new Set([
+  'svg', 'g', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'defs', 'symbol', 'use',
+  'lineargradient', 'radialgradient', 'stop', 'clippath', 'mask', 'pattern', 'title', 'desc', 'style', 'text', 'tspan',
+]);
+const URL_IN_CSS = /url\(\s*(['"]?)(?!#)[^)]*\1\s*\)|@import[^;]*;?|expression\s*\(/gi;
+
+/** Removes scripts, event handlers, foreign content, external references and animations from a parsed SVG. Returns how much was removed. */
+export function sanitizeSvg(root: Element): number {
+  let removed = 0;
+  const walk = (el: Element) => {
+    for (const child of [...el.children]) {
+      const tag = child.localName.toLowerCase();
+      if (!ALLOWED.has(tag)) { child.remove(); removed++; continue; }
+      walk(child);
+    }
+    for (const attr of [...el.attributes]) {
+      const n = attr.name.toLowerCase(), v = attr.value;
+      const isHref = n === 'href' || n.endsWith(':href');
+      if (n.startsWith('on') || (isHref && !v.trim().startsWith('#')) || /javascript:|data:text\/html/i.test(v)) { el.removeAttribute(attr.name); removed++; continue; }
+      if (n === 'style' || /url\(/i.test(v)) {
+        const clean = v.replace(URL_IN_CSS, (m) => (/url\(\s*['"]?#/.test(m) ? m : 'none'));
+        if (clean !== v) { el.setAttribute(attr.name, clean); removed++; }
+      }
+    }
+    if (el.localName.toLowerCase() === 'style' && el.textContent) {
+      const clean = el.textContent.replace(URL_IN_CSS, (m) => (/url\(\s*['"]?#/.test(m) ? m : 'none'));
+      if (clean !== el.textContent) { el.textContent = clean; removed++; }
+    }
+  };
+  if (root.localName.toLowerCase() !== 'svg') return removed;
+  walk(root);
+  return removed;
+}
+
 export function importSvgAsShapes(svgText: string, targetW: number, targetH: number): { shapes: Shape[]; skipped: number } {
   const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
   const src = doc.querySelector('svg');
-  if (!src) throw new Error('Not an SVG file');
+  if (!src || doc.querySelector('parsererror')) throw new Error('Not an SVG file');
+  // the parsed document is inert; clean it before it touches the live page
+  sanitizeSvg(src);
   // mount off-screen so the browser computes styles, bboxes and transforms
   const host = document.createElement('div');
   host.style.cssText = 'position:fixed;left:-10000px;top:0;width:1000px;height:1000px;visibility:hidden';

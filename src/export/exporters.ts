@@ -150,11 +150,13 @@ html, body { margin: 0; background: #fff; font-family: system-ui, sans-serif; }
 .bar { position: fixed; top: 8px; right: 8px; background: #1a8fd8; color: #fff; border: 0; padding: 8px 14px; border-radius: 6px; font: 600 13px system-ui; cursor: pointer; }
 @media print { .bar { display: none; } }
 </style></head><body>
-<button class="bar" onclick="window.print()">Print / Save as PDF</button>
+<button class="bar" type="button">Print / Save as PDF</button>
 ${svgs.map((x) => `<section class="sheet"><h1>${esc(s.doc.name)}${pages.length > 1 ? ' — ' + esc(x.name) : ''}</h1><div class="art">${x.svg}</div></section>`).join('')}
-<script>setTimeout(function(){ window.print(); }, 400);</script>
 </body></html>`);
   win.document.close();
+  // no inline script in the print window: the app's Content-Security-Policy applies to it too
+  win.document.querySelector('.bar')?.addEventListener('click', () => win.print());
+  setTimeout(() => win.print(), 400);
 }
 
 /**
@@ -167,15 +169,17 @@ export function buildViewerHtml(): string {
   const doc = withEmbeddedDefs(s.doc, s.libDefs);
   const root = document.documentElement.cloneNode(true) as HTMLElement;
   root.removeAttribute('data-theme');
-  root.querySelectorAll('script[data-networkcanvas-doc]').forEach((e) => e.remove());
+  root.querySelectorAll('script[data-networkcanvas-doc], script#networkcanvas-doc').forEach((e) => e.remove());
   const mount = root.querySelector('#root');
   if (mount) mount.innerHTML = '';
   const title = root.querySelector('title');
   if (title) title.textContent = doc.name;
   const json = JSON.stringify(doc).replace(/</g, '\\u003c').replace(/[\u2028\u2029]/g, '');
+  // a data block, not a script: it never runs, so the Content-Security-Policy stays strict
   const script = document.createElement('script');
-  script.setAttribute('data-networkcanvas-doc', '');
-  script.textContent = `window.__NETWORKCANVAS_DOC__=${json};window.__NETWORKCANVAS_VIEW__=true;`;
+  script.type = 'application/json';
+  script.id = 'networkcanvas-doc';
+  script.textContent = json;
   root.querySelector('head')!.appendChild(script);
   return '<!doctype html>\n' + root.outerHTML;
 }
