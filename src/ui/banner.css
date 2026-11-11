@@ -8,3 +8,4 @@
 [data-theme='dark'] .doc-card-meta.nofile { color: #f5b24a; }
 .app > .home { flex: 1; min-height: 0; height: auto; }
 .home-docs-title { display: flex; align-items: center; gap: 12px; }
+.licence-text { max-height: 50vh; overflow: auto; white-space: pre-wrap; font: 11px/1.45 var(--mono); background: var(--bg-2); padding: 12px; border-radius: 8px; border: 1px solid var(--border); }

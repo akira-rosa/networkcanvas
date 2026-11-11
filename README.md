@@ -19,6 +19,7 @@ Everything runs in the browser from one HTML file: no install, no account, no in
 - Or **use it online**: <https://akira-rosa.github.io/networkcanvas/> (the same file, served from GitHub Pages).
 - It opens on a **start screen** listing the diagrams saved in your browser (with live previews): create a new topology, open the bundled Smart4.0 example, open or drop a file, rename, duplicate, download or delete.
 - Diagrams autosave in your browser; use **File → Save to file** (`Ctrl+S`) for `.networkcanvas.json` files you can version, share or back up. The house button in the editor goes back to the start screen.
+- **Plant PCs:** each release has a SHA-256 checksum, a software bill of materials and a signed build-provenance attestation; see [SECURITY.md](SECURITY.md) to verify a copy before installing it.
 
 ## What it does
 

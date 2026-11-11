@@ -103,7 +103,8 @@ export function TopBar() {
     { label: 'Open the Smart4.0 example', action: () => loadSample() },
     { sep: true },
     { label: 'Keyboard shortcuts', shortcut: '?', action: () => s.set({ modal: 'shortcuts' }) },
-    { label: `Network Canvas v${__APP_VERSION__} — on GitHub`, action: () => window.open(__APP_REPO__, '_blank', 'noopener') },
+    { label: `About Network Canvas v${__APP_VERSION__} and licences…`, action: () => s.set({ modal: 'licences' }) },
+    { label: 'Network Canvas on GitHub', action: () => window.open(__APP_REPO__, '_blank', 'noopener') },
   ];
   const insertMenu: MenuItem[] = [
     { label: 'VLAN table', action: () => placeBlock('vlanTable') },
