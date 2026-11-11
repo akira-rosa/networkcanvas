@@ -13,6 +13,7 @@ export function Modals() {
   const close = () => set({ modal: null });
   if (modal === 'vlans') return <VlanManager onClose={close} />;
   if (modal === 'shortcuts') return <Shortcuts onClose={close} />;
+  if (modal === 'licences') return <Licences onClose={close} />;
   if (modal === 'find') return <FindPalette onClose={close} />;
   if (modal === 'export') return <ExportDialog onClose={close} />;
   if (modal === 'table') return <DeviceTable onClose={close} />;
@@ -103,6 +104,18 @@ function Shortcuts({ onClose }: { onClose: () => void }) {
           <div key={k} className="sc-row"><kbd>{k}</kbd><span>{d}</span></div>
         ))}
       </div>
+    </Modal>
+  );
+}
+
+/** Licences of the open-source components bundled into this file (embedded by scripts/postbuild.mjs). */
+function Licences({ onClose }: { onClose: () => void }) {
+  const text = document.getElementById('third-party-notices')?.textContent?.replace(/<\\\//g, '</');
+  return (
+    <Modal title="About Network Canvas" onClose={onClose} width={720}>
+      <p style={{ marginTop: 0 }}>Network Canvas {__APP_VERSION__} · MIT licence · <a href={__APP_REPO__} target="_blank" rel="noopener noreferrer">{__APP_REPO__.replace('https://', '')}</a></p>
+      <p className="hint">Each release on GitHub ships with a SHA-256 checksum, a software bill of materials and a signed build-provenance attestation; see SECURITY.md in the repository for how to verify a copy.</p>
+      <pre className="licence-text">{text || 'The licence notices are added when the app is built (npm run build).'}</pre>
     </Modal>
   );
 }

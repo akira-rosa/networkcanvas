@@ -14,7 +14,7 @@ export const systemTheme = (): ThemeName =>
   typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 
 export interface Toast { id: string; text: string; kind: 'info' | 'error' | 'success' }
-export type Modal = null | 'vlans' | 'shortcuts' | 'library' | 'find' | 'export' | 'table' | 'import';
+export type Modal = null | 'licences' | 'vlans' | 'shortcuts' | 'library' | 'find' | 'export' | 'table' | 'import';
 
 export interface EditorSession { def: DeviceDef; isNew: boolean; returnTo?: string }
 
